@@ -63,7 +63,7 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
   const [isCustomAmount, setIsCustomAmount] = useState(false);
   const [treatment, setTreatment] = useState('Limpieza Facial Profunda + Hidratación & Peeling');
   const [message, setMessage] = useState(MESSAGE_PRESETS[0]);
-  const [selectedThemeId, setSelectedThemeId] = useState('rose-gold');
+  const [selectedThemeId, setSelectedThemeId] = useState('noir-gold');
   const [voucherId, setVoucherId] = useState(() => `VIC-GC-${Math.floor(1000 + Math.random() * 9000)}`);
   const [isFlipped, setIsFlipped] = useState(false);
   const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
@@ -127,8 +127,8 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    const rx = ((y - rect.height / 2) / (rect.height / 2)) * -8;
-    const ry = ((x - rect.width / 2) / (rect.width / 2)) * 8;
+    const rx = ((y - rect.height / 2) / (rect.height / 2)) * -6;
+    const ry = ((x - rect.width / 2) / (rect.width / 2)) * 6;
     setTilt({ rx, ry });
   };
 
@@ -139,8 +139,8 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
   const triggerCelebration = () => {
     try {
       confetti({
-        particleCount: 80,
-        spread: 70,
+        particleCount: 90,
+        spread: 80,
         origin: { y: 0.6 },
         colors: ['#c98a92', '#f5ede5', '#d4af37', '#ffffff', '#e8c99e']
       });
@@ -212,7 +212,7 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
 
     const text = 
       `🎁 *¡HOLA ${card.recipientName.toUpperCase()}! TE REGALARON UNA GIFT CARD DE VIC ESTÉTICA INTEGRAL* 🌸✨\n\n` +
-      `*(Adjuntamos la foto oficial de tu tarjeta de regalo arriba 👆)*\n\n` +
+      `*(Adjuntamos la foto oficial de tu tarjeta de regalo en alta resolución 👆)*\n\n` +
       `👤 *De parte de:* ${card.senderName}\n` +
       `💌 *Dedicatoria especial:* "${card.message}"\n\n` +
       `🎀 *Detalle de tu regalo:*\n` +
@@ -259,7 +259,7 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
       const file = await generateGiftCardFile(generatedCard, selectedThemeId);
 
       const shareText = 
-        `🎁 ¡Hola ${generatedCard.recipientName}! ${generatedCard.senderName} te ha regalado una Gift Card exclusiva de VIC Estética Integral (Código: ${generatedCard.code}) en Mendoza 985, Río Segundo. Podés canjearla online o en consultorio.`;
+        `🎁 ¡Hola ${generatedCard.recipientName}! ${generatedCard.senderName} te ha regalado una Gift Card exclusiva de VIC Estética Integral (Código: ${generatedCard.code}) en Mendoza 985, Río Segundo.`;
 
       // 2. If navigator.canShare supports files (Mobile WhatsApp, Instagram, Telegram, AirDrop)
       if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -269,14 +269,12 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
           files: [file]
         });
       } else if (navigator.share) {
-        // Share text & link
         await navigator.share({
           title: `Gift Card VIC — ${generatedCard.recipientName}`,
           text: shareText,
           url: `${window.location.origin}/#giftcard-${generatedCard.code}`
         });
       } else {
-        // Fallback to WhatsApp text + auto download
         await handleSendWhatsAppGift(generatedCard);
       }
     } catch (err) {
@@ -295,7 +293,7 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
   const isApproved = generatedCard?.status === 'active' || generatedCard?.status === 'partially_used';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2c2725]/75 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#141110]/80 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
       <div className="bg-[#fcfaf7] w-full max-w-2xl rounded-3xl shadow-2xl border border-[#ede8e3] overflow-hidden flex flex-col my-auto max-h-[94vh]">
         
         {/* Modal Top Navigation Bar */}
@@ -376,26 +374,27 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
               </div>
             )}
 
-            {/* Generated Card Interactive Showcase */}
+            {/* Generated Card Showcase */}
             <div className="flex flex-col items-center">
               <div className="flex items-center justify-between w-full mb-2 text-xs">
-                <span className="font-bold text-[#6b6462] uppercase tracking-wider text-[10px]">
-                  Diseño de Tarjeta Digital Generado
+                <span className="font-bold text-[#6b6462] uppercase tracking-wider text-[10px] flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-[#d4af37]" />
+                  <span>Certificado Oficial de Regalo</span>
                 </span>
                 <button
                   type="button"
                   onClick={() => setIsFlipped(!isFlipped)}
-                  className="flex items-center gap-1.5 font-semibold text-[#c98a92] hover:text-[#b57a82] bg-white px-3 py-1 rounded-full border border-[#ede8e3] shadow-2xs cursor-pointer transition-transform active:scale-95"
+                  className="flex items-center gap-1.5 font-semibold text-[#8a6b36] hover:text-[#5e4823] bg-amber-50/80 px-3 py-1 rounded-full border border-amber-200/80 shadow-2xs cursor-pointer transition-transform active:scale-95 text-xs"
                 >
                   <RotateCw className="w-3.5 h-3.5" />
-                  <span>Ver {isFlipped ? 'Frente' : 'Dorso & Seguridad'}</span>
+                  <span>Girar ({isFlipped ? 'Frente' : 'Seguridad & QR'})</span>
                 </button>
               </div>
 
-              {/* 3D Realistic Digital Card Container */}
+              {/* 3D Realistic Digital Certificate Card Container */}
               <div 
                 style={{ perspective: '1200px' }}
-                className="w-full max-w-[480px] aspect-[1.65/1]"
+                className="w-full max-w-[500px] aspect-[1.65/1]"
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
                 ref={cardRef}
@@ -408,64 +407,80 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
                   }}
                   className="relative w-full h-full rounded-3xl shadow-2xl transition-all select-none"
                 >
-                  {/* CARD FRONT */}
+                  {/* CARD FRONT - HAUTE COUTURE LUXURY CERTIFICATE */}
                   <div 
                     style={{ 
                       backfaceVisibility: 'hidden',
-                      background: `linear-gradient(135deg, ${activeTheme.gradientStart}, ${activeTheme.gradientMid}, ${activeTheme.gradientEnd})`,
+                      background: `radial-gradient(circle at center, ${activeTheme.bgMid} 0%, ${activeTheme.bgStart} 60%, ${activeTheme.bgEnd} 100%)`,
                       color: activeTheme.textColor,
-                      borderColor: activeTheme.cardBorder
                     }}
-                    className="absolute inset-0 w-full h-full rounded-3xl p-6 overflow-hidden border shadow-inner flex flex-col justify-between"
+                    className="absolute inset-0 w-full h-full rounded-3xl p-4 sm:p-5 overflow-hidden border border-[#d4af37]/50 shadow-2xl flex flex-col justify-between"
                   >
-                    {/* Metallic Glow Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none" />
-                    <div className="absolute -right-8 -bottom-8 w-48 h-48 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+                    {/* Double Gold Foil Decorative Frame */}
+                    <div className="absolute inset-2.5 border border-[#d4af37]/60 rounded-2xl pointer-events-none" />
+                    <div className="absolute inset-3.5 border border-[#d4af37]/30 rounded-xl pointer-events-none" />
 
-                    {/* Top Bar */}
-                    <div className="flex justify-between items-start z-10">
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <Crown className="w-3.5 h-3.5" style={{ color: activeTheme.accentColor }} />
-                          <span className="text-[10px] uppercase tracking-[0.25em] font-bold opacity-90">
-                            Experiencia Exclusiva
-                          </span>
-                        </div>
-                        <h4 className="font-serif-cormorant text-2xl font-bold tracking-tight">
-                          VIC Estética Integral
-                        </h4>
-                      </div>
+                    {/* Corner Ornaments */}
+                    <span className="absolute top-4 left-4 text-[10px] text-[#d4af37]/80 leading-none">✦</span>
+                    <span className="absolute top-4 right-4 text-[10px] text-[#d4af37]/80 leading-none">✦</span>
+                    <span className="absolute bottom-4 left-4 text-[10px] text-[#d4af37]/80 leading-none">✦</span>
+                    <span className="absolute bottom-4 right-4 text-[10px] text-[#d4af37]/80 leading-none">✦</span>
 
-                      <div 
-                        style={{ backgroundColor: activeTheme.badgeBg, borderColor: activeTheme.foilColor }}
-                        className="px-3 py-1.5 rounded-2xl backdrop-blur-md flex items-center justify-center font-serif-cormorant font-bold text-xs border shadow-xs"
-                      >
-                        {isApproved ? 'GIFT VOUCHER ACTIVO' : 'VOUCHER PENDIENTE'}
+                    {/* Header: Crest & Brand */}
+                    <div className="text-center z-10 pt-1">
+                      <div className="text-[10px] text-[#d4af37] tracking-[0.3em] font-serif font-bold uppercase">
+                        ✦ ⚜ ✦
                       </div>
+                      <h4 className="font-serif-cormorant text-xl sm:text-2xl font-bold tracking-wider leading-tight">
+                        VIC ESTÉTICA INTEGRAL
+                      </h4>
+                      <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.25em] text-[#d4af37] font-semibold">
+                        Medicina Estética & Spa · Río Segundo
+                      </p>
                     </div>
 
-                    {/* Center Details */}
-                    <div className="my-auto z-10 bg-black/15 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="opacity-80 font-medium">Agasajada / Para:</span>
-                        <strong className="font-bold text-sm">{generatedCard.recipientName}</strong>
-                      </div>
-                      <div className="flex justify-between text-xs mb-2">
-                        <span className="opacity-80 font-medium">De:</span>
-                        <strong className="font-semibold">{generatedCard.senderName}</strong>
-                      </div>
-                      <div className="pt-2 border-t border-white/20 flex justify-between items-baseline">
-                        <span className="text-[10px] uppercase tracking-wider opacity-80">Obsequio:</span>
-                        <span className="text-base sm:text-lg font-bold" style={{ color: activeTheme.foilColor }}>
-                          {generatedCard.cardType === 'treatment' ? generatedCard.treatmentName : formatPrice(generatedCard.initialBalance)}
+                    {/* Center Luxury Framed Box */}
+                    <div 
+                      style={{ 
+                        backgroundColor: activeTheme.glassBg,
+                        borderColor: activeTheme.glassBorder 
+                      }}
+                      className="my-auto z-10 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 border shadow-inner text-center space-y-1"
+                    >
+                      <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] font-semibold opacity-75 block text-[#d4af37]">
+                        Especialmente presentado a:
+                      </span>
+                      <h3 className="font-serif-cormorant text-lg sm:text-2xl font-bold tracking-tight text-white drop-shadow-sm">
+                        {generatedCard.recipientName}
+                      </h3>
+                      <p className="text-[10px] sm:text-[11px] italic opacity-85 text-white/90">
+                        Con el cariño de: <strong>{generatedCard.senderName}</strong>
+                      </p>
+
+                      {/* Benefit Tag */}
+                      <div 
+                        style={{ backgroundColor: activeTheme.badgeBg }}
+                        className="py-1 px-3 rounded-xl border border-[#d4af37]/60 inline-block max-w-full mt-1 shadow-xs"
+                      >
+                        <span className="text-xs sm:text-sm font-bold font-serif-cormorant text-[#fbf5b7] tracking-wide block truncate">
+                          ✦ {generatedCard.cardType === 'treatment' ? generatedCard.treatmentName : formatPrice(generatedCard.initialBalance)} ✦
                         </span>
                       </div>
+
+                      {/* Message quote */}
+                      <p className="text-[10px] italic opacity-85 truncate max-w-[340px] mx-auto text-white/80 pt-0.5">
+                        "{generatedCard.message}"
+                      </p>
                     </div>
 
-                    {/* Bottom Dedication */}
-                    <div className="z-10 flex items-center justify-between text-[11px] opacity-90 pt-1 border-t border-white/10">
-                      <span className="italic truncate max-w-[280px]">"{generatedCard.message}"</span>
-                      <span className="uppercase font-semibold tracking-widest text-[9px] opacity-80">Mendoza 985</span>
+                    {/* Bottom Security & Seal Strip */}
+                    <div className="z-10 flex items-center justify-between text-[9px] sm:text-[10px] px-2 pt-0.5 border-t border-white/10">
+                      <div className="font-mono bg-black/40 px-2 py-0.5 rounded border border-[#d4af37]/50 text-[#fbf5b7] font-bold">
+                        ID: {generatedCard.code}
+                      </div>
+                      <div className="text-[8px] sm:text-[9px] uppercase tracking-wider text-[#d4af37] font-semibold">
+                        Sello Oficial · Válida 90 días
+                      </div>
                     </div>
                   </div>
 
@@ -475,14 +490,14 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
                       backfaceVisibility: 'hidden',
                       transform: 'rotateY(180deg)',
                     }}
-                    className="absolute inset-0 w-full h-full rounded-3xl p-6 bg-gradient-to-br from-[#2c2725] via-[#3a3432] to-[#241f1e] text-white overflow-hidden border border-[#ede8e3]/20 shadow-inner flex flex-col justify-between"
+                    className="absolute inset-0 w-full h-full rounded-3xl p-6 bg-gradient-to-br from-[#1c1817] via-[#262120] to-[#141110] text-white overflow-hidden border border-[#d4af37]/40 shadow-inner flex flex-col justify-between"
                   >
                     <div className="flex justify-between items-center z-10 border-b border-white/10 pb-2">
-                      <div className="text-[10px] uppercase tracking-widest text-[#c98a92] font-bold flex items-center gap-1.5">
+                      <div className="text-[10px] uppercase tracking-widest text-[#d4af37] font-bold flex items-center gap-1.5">
                         <ShieldCheck className="w-3.5 h-3.5" />
                         <span>{isApproved ? 'Seguridad & Canje Habilitado' : 'Validación en Proceso'}</span>
                       </div>
-                      <div className="text-[11px] text-white/90 font-mono font-bold bg-white/10 px-2 py-0.5 rounded border border-white/10">
+                      <div className="text-[11px] text-[#fbf5b7] font-mono font-bold bg-white/10 px-2 py-0.5 rounded border border-[#d4af37]/40">
                         {generatedCard.code}
                       </div>
                     </div>
@@ -490,15 +505,15 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
                     <div className="grid grid-cols-3 gap-3 items-center z-10 my-auto">
                       <div className="col-span-2 space-y-1 text-[11px] text-white/80">
                         <p className="flex items-center gap-1.5">
-                          <Check className="w-3 h-3 text-[#c98a92] shrink-0" />
+                          <Check className="w-3 h-3 text-[#d4af37] shrink-0" />
                           <span>Válida por 90 días corridos.</span>
                         </p>
                         <p className="flex items-center gap-1.5">
-                          <Check className="w-3 h-3 text-[#c98a92] shrink-0" />
+                          <Check className="w-3 h-3 text-[#d4af37] shrink-0" />
                           <span>Canjeable en Mendoza 985, Río Segundo.</span>
                         </p>
-                        <p className="flex items-center gap-1.5 text-[#c98a92] font-semibold">
-                          <Check className="w-3 h-3 text-[#c98a92] shrink-0" />
+                        <p className="flex items-center gap-1.5 text-[#d4af37] font-semibold">
+                          <Check className="w-3 h-3 text-[#d4af37] shrink-0" />
                           <span>Turnos online o por WhatsApp.</span>
                         </p>
                       </div>
@@ -537,7 +552,7 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
                       : 'bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-300'
                   }`}
                 >
-                  <Share2 className="w-4 h-4 text-[#c98a92]" />
+                  <Share2 className="w-4 h-4 text-[#d4af37]" />
                   <span>{isDownloading ? 'Generando Foto HD...' : 'Compartir Foto de la Gift Card'}</span>
                 </button>
 
@@ -615,13 +630,13 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
             <div className="flex flex-col items-center">
               <div className="flex items-center justify-between w-full mb-2">
                 <span className="text-[10px] uppercase tracking-widest text-[#8a807d] font-bold flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-[#c98a92]" />
-                  <span>Vista previa en tiempo real</span>
+                  <Sparkles className="w-3 h-3 text-[#d4af37]" />
+                  <span>Certificado Oficial en Tiempo Real</span>
                 </span>
                 <button
                   type="button"
                   onClick={() => setIsFlipped(!isFlipped)}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-[#c98a92] hover:text-[#b57a82] bg-white px-3 py-1 rounded-full border border-[#ede8e3] shadow-2xs cursor-pointer transition-transform active:scale-95"
+                  className="flex items-center gap-1.5 text-xs font-semibold text-[#8a6b36] hover:text-[#5e4823] bg-amber-50/80 px-3 py-1 rounded-full border border-amber-200/80 shadow-2xs cursor-pointer transition-transform active:scale-95"
                 >
                   <RotateCw className="w-3.5 h-3.5" />
                   <span>Girar ({isFlipped ? 'Dorso' : 'Frente'})</span>
@@ -631,7 +646,7 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
               {/* 3D Realistic Digital Card Container */}
               <div 
                 style={{ perspective: '1200px' }}
-                className="w-full max-w-[440px] aspect-[1.65/1]"
+                className="w-full max-w-[460px] aspect-[1.65/1]"
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
               >
@@ -643,65 +658,82 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
                   }}
                   className="relative w-full h-full rounded-3xl shadow-2xl transition-all cursor-pointer select-none"
                 >
-                  {/* CARD FRONT */}
+                  {/* CARD FRONT - HAUTE COUTURE LUXURY CERTIFICATE */}
                   <div 
                     style={{ 
                       backfaceVisibility: 'hidden',
-                      background: `linear-gradient(135deg, ${activeTheme.gradientStart}, ${activeTheme.gradientMid}, ${activeTheme.gradientEnd})`,
+                      background: `radial-gradient(circle at center, ${activeTheme.bgMid} 0%, ${activeTheme.bgStart} 60%, ${activeTheme.bgEnd} 100%)`,
                       color: activeTheme.textColor,
-                      borderColor: activeTheme.cardBorder
                     }}
-                    className="absolute inset-0 w-full h-full rounded-3xl p-5 sm:p-6 overflow-hidden border shadow-inner flex flex-col justify-between"
+                    className="absolute inset-0 w-full h-full rounded-3xl p-4 sm:p-5 overflow-hidden border border-[#d4af37]/50 shadow-2xl flex flex-col justify-between"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/15 to-transparent pointer-events-none" />
-                    <div className="absolute -right-8 -bottom-8 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+                    {/* Double Gold Foil Frame */}
+                    <div className="absolute inset-2.5 border border-[#d4af37]/60 rounded-2xl pointer-events-none" />
+                    <div className="absolute inset-3.5 border border-[#d4af37]/30 rounded-xl pointer-events-none" />
 
-                    {/* Top Bar */}
-                    <div className="flex justify-between items-start z-10">
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <Crown className="w-3.5 h-3.5" style={{ color: activeTheme.accentColor }} />
-                          <span className="text-[9px] uppercase tracking-[0.25em] font-bold opacity-90">
-                            Experiencia Exclusiva
-                          </span>
-                        </div>
-                        <h4 className="font-serif-cormorant text-xl sm:text-2xl font-bold tracking-tight">
-                          VIC Estética Integral
-                        </h4>
-                      </div>
+                    {/* Corner Ornaments */}
+                    <span className="absolute top-4 left-4 text-[10px] text-[#d4af37]/80 leading-none">✦</span>
+                    <span className="absolute top-4 right-4 text-[10px] text-[#d4af37]/80 leading-none">✦</span>
+                    <span className="absolute bottom-4 left-4 text-[10px] text-[#d4af37]/80 leading-none">✦</span>
+                    <span className="absolute bottom-4 right-4 text-[10px] text-[#d4af37]/80 leading-none">✦</span>
 
-                      <div 
-                        style={{ backgroundColor: activeTheme.badgeBg, borderColor: activeTheme.foilColor }}
-                        className="px-2.5 py-1 rounded-xl backdrop-blur-md flex items-center justify-center font-serif-cormorant font-bold text-[11px] border shadow-xs"
-                      >
-                        GIFT VOUCHER
+                    {/* Header: Crest & Brand */}
+                    <div className="text-center z-10 pt-1">
+                      <div className="text-[10px] text-[#d4af37] tracking-[0.3em] font-serif font-bold uppercase">
+                        ✦ ⚜ ✦
                       </div>
+                      <h4 className="font-serif-cormorant text-lg sm:text-2xl font-bold tracking-wider leading-tight">
+                        VIC ESTÉTICA INTEGRAL
+                      </h4>
+                      <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.25em] text-[#d4af37] font-semibold">
+                        Medicina Estética & Spa · Río Segundo
+                      </p>
                     </div>
 
-                    {/* Center Details */}
-                    <div className="my-auto z-10 bg-black/15 backdrop-blur-sm rounded-2xl p-3 sm:p-3.5 border border-white/20">
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="opacity-80">Para:</span>
-                        <strong className="font-semibold">{recipient || 'Nombre de la agasajada'}</strong>
-                      </div>
-                      <div className="flex justify-between text-xs mb-2">
-                        <span className="opacity-80">De:</span>
-                        <strong className="font-semibold">{sender || 'Tu nombre'}</strong>
-                      </div>
-                      <div className="pt-2 border-t border-white/20 flex justify-between items-baseline">
-                        <span className="text-[10px] uppercase tracking-wider opacity-80">Obsequio:</span>
-                        <span className="text-sm sm:text-base font-bold" style={{ color: activeTheme.foilColor }}>
-                          {cardType === 'amount' 
+                    {/* Center Luxury Framed Box */}
+                    <div 
+                      style={{ 
+                        backgroundColor: activeTheme.glassBg,
+                        borderColor: activeTheme.glassBorder 
+                      }}
+                      className="my-auto z-10 backdrop-blur-md rounded-2xl p-2.5 sm:p-3 border shadow-inner text-center space-y-1"
+                    >
+                      <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] font-semibold opacity-75 block text-[#d4af37]">
+                        Especialmente presentado a:
+                      </span>
+                      <h3 className="font-serif-cormorant text-base sm:text-xl font-bold tracking-tight text-white drop-shadow-sm truncate">
+                        {recipient || 'Nombre de la agasajada'}
+                      </h3>
+                      <p className="text-[9px] sm:text-[10px] italic opacity-85 text-white/90">
+                        Con el cariño de: <strong>{sender || 'Tu nombre'}</strong>
+                      </p>
+
+                      {/* Benefit Tag */}
+                      <div 
+                        style={{ backgroundColor: activeTheme.badgeBg }}
+                        className="py-1 px-3 rounded-xl border border-[#d4af37]/60 inline-block max-w-full mt-1 shadow-xs"
+                      >
+                        <span className="text-xs sm:text-sm font-bold font-serif-cormorant text-[#fbf5b7] tracking-wide block truncate">
+                          ✦ {cardType === 'amount' 
                             ? formatPrice(isCustomAmount ? Number(customAmount) || 0 : Number(amount) || 0) 
-                            : treatment}
+                            : treatment} ✦
                         </span>
                       </div>
+
+                      {/* Message quote */}
+                      <p className="text-[9px] italic opacity-80 truncate max-w-[300px] mx-auto text-white/80 pt-0.5">
+                        "{message}"
+                      </p>
                     </div>
 
-                    {/* Bottom Dedication */}
-                    <div className="z-10 flex items-center justify-between text-[10px] opacity-80 pt-1">
-                      <span className="italic truncate max-w-[240px]">"{message}"</span>
-                      <span className="uppercase font-semibold tracking-widest text-[9px]">Río Segundo</span>
+                    {/* Bottom Security & Seal Strip */}
+                    <div className="z-10 flex items-center justify-between text-[8px] sm:text-[9px] px-2 pt-0.5 border-t border-white/10">
+                      <div className="font-mono bg-black/40 px-2 py-0.5 rounded border border-[#d4af37]/50 text-[#fbf5b7] font-bold">
+                        ID: {voucherId}
+                      </div>
+                      <div className="uppercase tracking-wider text-[#d4af37] font-semibold">
+                        Sello Oficial · Válida 90 días
+                      </div>
                     </div>
                   </div>
 
@@ -711,10 +743,10 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
                       backfaceVisibility: 'hidden',
                       transform: 'rotateY(180deg)',
                     }}
-                    className="absolute inset-0 w-full h-full rounded-3xl p-5 sm:p-6 bg-gradient-to-br from-[#2c2725] via-[#3a3432] to-[#241f1e] text-white overflow-hidden border border-[#ede8e3]/20 shadow-inner flex flex-col justify-between"
+                    className="absolute inset-0 w-full h-full rounded-3xl p-5 sm:p-6 bg-gradient-to-br from-[#1c1817] via-[#262120] to-[#141110] text-white overflow-hidden border border-[#d4af37]/40 shadow-inner flex flex-col justify-between"
                   >
                     <div className="flex justify-between items-center z-10 border-b border-white/10 pb-2">
-                      <div className="text-[10px] uppercase tracking-widest text-[#c98a92] font-bold">
+                      <div className="text-[10px] uppercase tracking-widest text-[#d4af37] font-bold">
                         Condiciones & Canje
                       </div>
                       <div className="text-[10px] text-white/70 font-mono">
@@ -725,14 +757,14 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
                     <div className="grid grid-cols-3 gap-3 items-center z-10 my-auto">
                       <div className="col-span-2 space-y-1 text-[11px] text-white/80">
                         <p className="flex items-center gap-1.5">
-                          <ShieldCheck className="w-3.5 h-3.5 text-[#c98a92] shrink-0" />
+                          <ShieldCheck className="w-3.5 h-3.5 text-[#d4af37] shrink-0" />
                           <span>Válida por 90 días corridos.</span>
                         </p>
                         <p className="flex items-center gap-1.5">
-                          <Sparkles className="w-3.5 h-3.5 text-[#c98a92] shrink-0" />
+                          <Sparkles className="w-3.5 h-3.5 text-[#d4af37] shrink-0" />
                           <span>Canjeable en Mendoza 985, Río Segundo.</span>
                         </p>
-                        <p className="flex items-center gap-1.5 text-[#c98a92] font-semibold">
+                        <p className="flex items-center gap-1.5 text-[#d4af37] font-semibold">
                           <span>Turnos online o por WhatsApp.</span>
                         </p>
                       </div>
@@ -765,13 +797,13 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
                     onClick={() => setSelectedThemeId(theme.id)}
                     className={`p-2.5 rounded-2xl border text-left flex items-center gap-2 cursor-pointer transition-all ${
                       selectedThemeId === theme.id 
-                        ? 'border-[#c98a92] bg-white ring-2 ring-[#c98a92]/20 shadow-xs' 
+                        ? 'border-[#d4af37] bg-amber-50/40 ring-2 ring-[#d4af37]/30 shadow-xs' 
                         : 'border-[#ede8e3] bg-[#fcfaf7] hover:bg-white'
                     }`}
                   >
                     <div 
-                      style={{ background: `linear-gradient(135deg, ${theme.gradientStart}, ${theme.gradientEnd})` }}
-                      className="w-5 h-5 rounded-full shrink-0 border border-white/50 shadow-2xs" 
+                      style={{ background: theme.previewBg }}
+                      className="w-5 h-5 rounded-full shrink-0 border border-[#d4af37] shadow-2xs" 
                     />
                     <span className="text-[11px] font-semibold text-[#2c2725] truncate">
                       {theme.name.split('&')[0].trim()}
@@ -945,10 +977,10 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
                 className="w-full py-4 rounded-2xl bg-[#c98a92] hover:bg-[#b57a82] text-white text-xs sm:text-sm font-bold uppercase tracking-widest transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 cursor-pointer active:scale-98"
               >
                 <Gift className="w-4 h-4" />
-                <span>Generar Tarjeta & Notificar al Staff para Confirmar</span>
+                <span>Generar Certificado Oficial & Notificar al Staff</span>
               </button>
               <p className="text-[11px] text-[#8a807d] text-center">
-                Al generar la tarjeta, el staff de VIC confirmará el voucher en recepción para que puedas enviarlo a la agasajada.
+                Al generar el certificado, el staff de VIC confirmará el voucher en recepción para que puedas enviarlo a la agasajada.
               </p>
             </div>
 
