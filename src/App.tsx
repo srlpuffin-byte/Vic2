@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Navbar 
 } from './components/AestheticNavbar';
@@ -37,6 +37,7 @@ export function App() {
   // Modal States
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isGiftCardOpen, setIsGiftCardOpen] = useState(false);
+  const [initialGiftCardCode, setInitialGiftCardCode] = useState<string | undefined>(undefined);
   const [isComboPlannerOpen, setIsComboPlannerOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isConciergeOpen, setIsConciergeOpen] = useState(false);
@@ -45,6 +46,30 @@ export function App() {
   const [systemInitialTab, setSystemInitialTab] = useState<'appointments' | 'giftcards' | 'issue-giftcard' | 'client-portal'>('client-portal');
   const [systemStaffMode, setSystemStaffMode] = useState<boolean>(false);
   const [selectedDetailService, setSelectedDetailService] = useState<ServiceItem | null>(null);
+
+  // Check URL query / hash for gift card links (e.g. #giftcard-VIC-GC-XXXX or ?giftcard=VIC-GC-XXXX)
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash;
+      const params = new URLSearchParams(window.location.search);
+      const gcParam = params.get('giftcard');
+
+      if (hash.startsWith('#giftcard-')) {
+        const code = hash.replace('#giftcard-', '');
+        if (code) {
+          setInitialGiftCardCode(code);
+          setIsGiftCardOpen(true);
+        }
+      } else if (gcParam) {
+        setInitialGiftCardCode(gcParam);
+        setIsGiftCardOpen(true);
+      }
+    };
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   // Pre-selected parameters for booking modal
   const [preSelectedBookingService, setPreSelectedBookingService] = useState<ServiceItem | null>(null);
@@ -243,7 +268,14 @@ export function App() {
       {/* 4. Gift Card Modal */}
       <GiftCardModal
         isOpen={isGiftCardOpen}
-        onClose={() => setIsGiftCardOpen(false)}
+        onClose={() => {
+          setIsGiftCardOpen(false);
+          setInitialGiftCardCode(undefined);
+          if (window.location.hash.startsWith('#giftcard-')) {
+            window.history.replaceState(null, '', window.location.pathname);
+          }
+        }}
+        initialCode={initialGiftCardCode}
         onOpenBookingWithGiftCard={handleOpenBookingWithGiftCard}
       />
 

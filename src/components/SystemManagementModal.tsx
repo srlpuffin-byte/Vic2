@@ -35,11 +35,14 @@ import {
   Unlock,
   KeyRound,
   LogOut,
-  HelpCircle
+  HelpCircle,
+  Download,
+  MessageCircle
 } from 'lucide-react';
 import { AppointmentItem, GiftCardItem, ServiceItem } from '../types';
 import { SystemStorage } from '../utils/systemStorage';
 import { SERVICES_DATA, BUSINESS_DATA, formatPrice } from '../data/aestheticData';
+import { downloadGiftCardImage } from '../utils/giftCardRenderer';
 
 interface SystemManagementModalProps {
   isOpen: boolean;
@@ -1004,16 +1007,43 @@ export const SystemManagementModal: React.FC<SystemManagementModalProps> = ({
                       </p>
                     </div>
 
-                    <div className="flex justify-center gap-2 pt-2">
+                    <div className="flex flex-wrap justify-center gap-2 pt-2">
                       <button
+                        type="button"
                         onClick={() => handleCopy(createdGiftCard.code, 'issued-code')}
-                        className="px-4 py-2 bg-white border border-emerald-300 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                        className="px-3.5 py-2 bg-white border border-emerald-300 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs"
                       >
                         {copiedCode === 'issued-code' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                         <span>{copiedCode === 'issued-code' ? 'Copiado' : 'Copiar Código'}</span>
                       </button>
 
                       <button
+                        type="button"
+                        onClick={() => downloadGiftCardImage(createdGiftCard, 'rose-gold')}
+                        className="px-3.5 py-2 bg-white border border-emerald-300 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs hover:bg-emerald-50"
+                      >
+                        <Download className="w-3.5 h-3.5 text-emerald-700" />
+                        <span>Descargar Tarjeta HD</span>
+                      </button>
+
+                      <a
+                        href={`https://wa.me/?text=${encodeURIComponent(
+                          `🎁 *¡Hola ${createdGiftCard.recipientName}!* Te enviamos tu Gift Card oficial de VIC Estética Integral en Río Segundo.\n\n` +
+                          `🎫 *Código:* ${createdGiftCard.code}\n` +
+                          `💰 *Beneficio:* ${createdGiftCard.cardType === 'treatment' ? createdGiftCard.treatmentName : formatPrice(createdGiftCard.initialBalance)}\n` +
+                          `📍 *Ubicación:* Mendoza 985, Río Segundo\n` +
+                          `✨ Podés canjearla en consultorio o reservando tu turno online.`
+                        )}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3.5 py-2 bg-[#25D366] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs hover:bg-[#20ba59]"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>Enviar WhatsApp</span>
+                      </a>
+
+                      <button
+                        type="button"
                         onClick={() => setCreatedGiftCard(null)}
                         className="px-4 py-2 bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer hover:bg-emerald-800"
                       >
