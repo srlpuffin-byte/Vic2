@@ -8,12 +8,11 @@ if (typeof window !== 'undefined') {
 }
 
 /**
- * Advanced High-End GSAP Animations for VIC Estética Integral:
- * - Ultra-smooth cinematic hero reveal with 3D perspective tilt
- * - Interactive Magnetic 3D tilt on luxury cards
- * - ScrollTrigger parallax elements & staggered luxury reveals
- * - Soft number count-ups for clinical milestones
- * - Floating badges with physics-inspired breathing motion
+ * Robust High-End GSAP Animations for VIC Estética Integral:
+ * - Ultra-smooth cinematic hero reveal
+ * - Guaranteed one-time scroll reveal for all section headers and titles
+ * - clearProps on completion so elements never get stuck invisible
+ * - Magnetic 3D tilt on luxury cards
  */
 export function useGsapAnimations() {
   useEffect(() => {
@@ -21,52 +20,54 @@ export function useGsapAnimations() {
 
     const ctx = gsap.context(() => {
       // ==========================================
-      // 1. HERO CINEMATIC REVEAL (Layered Timeline)
+      // 1. HERO CINEMATIC REVEAL
       // ==========================================
-      const heroTl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+      const heroTl = gsap.timeline({
+        defaults: { ease: 'power3.out' }
+      });
 
       heroTl
         .fromTo(
           '.gsap-hero-badge',
-          { opacity: 0, y: -25, scale: 0.9 },
-          { opacity: 1, y: 0, scale: 1, duration: 1, delay: 0.15 }
+          { opacity: 0, y: -15 },
+          { opacity: 1, y: 0, duration: 0.8, clearProps: 'transform' }
         )
         .fromTo(
           '.gsap-hero-title',
-          { opacity: 0, y: 40, skewY: 1.5 },
-          { opacity: 1, y: 0, skewY: 0, duration: 1.2 },
-          '-=0.7'
-        )
-        .fromTo(
-          '.gsap-hero-desc',
-          { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, duration: 1 },
-          '-=0.8'
-        )
-        .fromTo(
-          '.gsap-hero-actions > *',
-          { opacity: 0, y: 25, scale: 0.95 },
-          { opacity: 1, y: 0, scale: 1, stagger: 0.12, duration: 0.8, ease: 'back.out(1.5)' },
-          '-=0.6'
-        )
-        .fromTo(
-          '.gsap-hero-stats > *',
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, stagger: 0.1, duration: 0.8 },
+          { opacity: 0, y: 25 },
+          { opacity: 1, y: 0, duration: 0.9, clearProps: 'transform' },
           '-=0.5'
         )
         .fromTo(
+          '.gsap-hero-desc',
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.8, clearProps: 'transform' },
+          '-=0.6'
+        )
+        .fromTo(
+          '.gsap-hero-actions > *',
+          { opacity: 0, y: 15, scale: 0.96 },
+          { opacity: 1, y: 0, scale: 1, stagger: 0.08, duration: 0.6, clearProps: 'all' },
+          '-=0.5'
+        )
+        .fromTo(
+          '.gsap-hero-stats > *',
+          { opacity: 0, y: 15 },
+          { opacity: 1, y: 0, stagger: 0.08, duration: 0.6, clearProps: 'all' },
+          '-=0.4'
+        )
+        .fromTo(
           '.gsap-hero-card',
-          { opacity: 0, x: 50, scale: 0.94, rotateY: 8 },
-          { opacity: 1, x: 0, scale: 1, rotateY: 0, duration: 1.4, ease: 'power3.out' },
-          '-=1'
+          { opacity: 0, y: 30, scale: 0.97 },
+          { opacity: 1, y: 0, scale: 1, duration: 1, ease: 'power2.out', clearProps: 'opacity' },
+          '-=0.7'
         );
 
       // ==========================================
       // 2. PARALLAX & AMBIENT BREATHING GLOWS
       // ==========================================
       gsap.to('.gsap-ambient-glow', {
-        scale: 1.25,
+        scale: 1.2,
         opacity: 0.9,
         duration: 5,
         repeat: -1,
@@ -76,81 +77,83 @@ export function useGsapAnimations() {
 
       // Subtle floating bob on Hero apparatus card
       gsap.to('.gsap-hero-card', {
-        y: -8,
+        y: -6,
         duration: 3.5,
         repeat: -1,
         yoyo: true,
         ease: 'sine.inOut',
-        delay: 1.5
+        delay: 1.2
       });
 
       // ==========================================
       // 3. STATS CLINICAL NUMERICAL REVEAL
       // ==========================================
-      gsap.fromTo(
-        '.gsap-stat-item',
-        { opacity: 0, y: 40, scale: 0.9 },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 1,
-          stagger: 0.15,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: '.gsap-stats-row',
-            start: 'top 85%',
-            toggleActions: 'play none none reverse'
+      const statsRow = document.querySelector('.gsap-stats-row');
+      if (statsRow) {
+        gsap.fromTo(
+          '.gsap-stat-item',
+          { opacity: 0, y: 25 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: 'power2.out',
+            clearProps: 'all',
+            scrollTrigger: {
+              trigger: '.gsap-stats-row',
+              start: 'top 95%',
+              once: true
+            }
           }
-        }
-      );
+        );
+      }
 
       // ==========================================
-      // 4. SECTION HEADERS LUXURY REVEAL
+      // 4. SECTION HEADERS & TITLES REVEAL (Guaranteed once: true)
       // ==========================================
       const headers = document.querySelectorAll('.gsap-section-header');
       headers.forEach((header) => {
         gsap.fromTo(
           header,
-          { opacity: 0, y: 35 },
+          { opacity: 0, y: 25 },
           {
             opacity: 1,
             y: 0,
-            duration: 0.9,
-            ease: 'power3.out',
+            duration: 0.75,
+            ease: 'power2.out',
+            clearProps: 'all',
             scrollTrigger: {
               trigger: header,
-              start: 'top 88%',
-              toggleActions: 'play none none reverse'
+              start: 'top 92%',
+              once: true
             }
           }
         );
       });
 
       // ==========================================
-      // 5. SMART BATCH CARD REVEALS WITH 3D POP
+      // 5. SMART CARD REVEALS
       // ==========================================
       const cards = document.querySelectorAll('.gsap-reveal-card');
-      if (cards.length > 0) {
-        ScrollTrigger.batch('.gsap-reveal-card', {
-          start: 'top 90%',
-          onEnter: (batch) => {
-            gsap.fromTo(
-              batch,
-              { opacity: 0, y: 40, scale: 0.96 },
-              {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                stagger: 0.1,
-                duration: 0.85,
-                ease: 'power2.out',
-                overwrite: 'auto'
-              }
-            );
+      cards.forEach((card) => {
+        gsap.fromTo(
+          card,
+          { opacity: 0, y: 25 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.7,
+            ease: 'power2.out',
+            clearProps: 'all',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 94%',
+              once: true
+            }
           }
-        });
-      }
+        );
+      });
 
       // ==========================================
       // 6. MAGNETIC 3D TILT EFFECT ON CARDS
@@ -163,8 +166,8 @@ export function useGsapAnimations() {
           const y = e.clientY - rect.top - rect.height / 2;
 
           gsap.to(card, {
-            rotationY: x * 0.04,
-            rotationX: -y * 0.04,
+            rotationY: x * 0.03,
+            rotationX: -y * 0.03,
             transformPerspective: 900,
             ease: 'power1.out',
             duration: 0.4
@@ -176,7 +179,7 @@ export function useGsapAnimations() {
             rotationY: 0,
             rotationX: 0,
             ease: 'power2.out',
-            duration: 0.6
+            duration: 0.5
           });
         };
 
@@ -189,27 +192,41 @@ export function useGsapAnimations() {
       // ==========================================
       gsap.fromTo(
         '.gsap-floating-actions',
-        { opacity: 0, scale: 0.8, y: 25 },
+        { opacity: 0, scale: 0.85, y: 20 },
         {
           opacity: 1,
           scale: 1,
           y: 0,
-          duration: 1,
-          delay: 0.8,
-          ease: 'elastic.out(1, 0.7)'
+          duration: 0.8,
+          delay: 0.5,
+          ease: 'power2.out',
+          clearProps: 'all'
         }
       );
     });
 
+    // Refresh ScrollTrigger after assets load
     const refreshTimer = setTimeout(() => {
       ScrollTrigger.refresh();
-    }, 400);
+    }, 500);
+
+    // Fallback safety to guarantee all elements are visible in any edge case
+    const safetyTimer = setTimeout(() => {
+      document.querySelectorAll<HTMLElement>('.gsap-section-header, .gsap-reveal-card, .gsap-hero-title, .gsap-hero-desc, .gsap-hero-badge, .gsap-stat-item').forEach((el) => {
+        if (getComputedStyle(el).opacity === '0') {
+          el.style.opacity = '1';
+          el.style.transform = 'none';
+        }
+      });
+    }, 1200);
 
     return () => {
       clearTimeout(refreshTimer);
+      clearTimeout(safetyTimer);
       ctx.revert();
     };
   }, []);
 }
 
 export { gsap, ScrollTrigger };
+
