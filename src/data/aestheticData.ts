@@ -731,19 +731,24 @@ export const HIGHLIGHTS_DATA = [
 
 export const FAQ_DATA = [
   {
-    category: "turnos",
-    q: "¿Cuáles son los días y horarios de atención en VIC Estética?",
-    a: "Nuestros días y horarios son personalizados y flexibles según la comodidad de la paciente, con jornadas fijas destacadas los días Jueves. Coordinamos los turnos de manera directa y personalizada por WhatsApp al 3572 50-1956."
+    category: "medicina",
+    q: "¿Qué procedimientos de Medicina Estética realiza la Dra. María Pía Gelso?",
+    a: "La Dra. María Pía Gelso realiza aplicaciones de toxina botulínica (Botox) para líneas de expresión en frente, entrecejo y patas de gallo, rellenos y perfilado de labios con ácido hialurónico, bioestimuladores de colágeno (Radiesse/Sculptra) para flacidez dérmica, rinomodelación y mesoterapia facial polirevitalizante (NCTF)."
   },
   {
     category: "medicina",
-    q: "¿Qué procedimientos de Medicina Estética realiza la Dra. María Pía Gelso?",
-    a: "La Dra. María Pía Gelso realiza aplicaciones de toxina botulínica (Botox) para líneas de expresión, rellenos y armonización labial y facial con ácido hialurónico, bioestimuladores de colágeno (Radiesse/Sculptra) y mesoterapia facial polirevitalizante."
+    q: "¿Cómo se coordinan los turnos de Medicina Estética con la Dra. Gelso?",
+    a: "Los procedimientos médicos se realizan en jornadas fijas y programadas en nuestro consultorio privado de Mendoza 985. La consulta incluye una evaluación facial personalizada y mapeo anatómico previo a la aplicación. Podés reservar directamente desde la web o coordinar por WhatsApp al 3572 50-1956."
+  },
+  {
+    category: "turnos",
+    q: "¿Cuáles son los días y horarios de atención en VIC Estética?",
+    a: "Nuestros días y horarios son personalizados y flexibles según la comodidad de la paciente, con jornadas fijas destacadas los días Jueves (09:00 a 20:00 hs) y atención de Lunes a Sábados con turno previo coordinado."
   },
   {
     category: "general",
     q: "¿Dónde está ubicado el consultorio?",
-    a: "Estamos ubicados en Mendoza 985, Río Segundo, Córdoba (CP 5960), en un espacio climatizado y privado con fácil estacionamiento al frente."
+    a: "Estamos ubicados en Mendoza 985, Río Segundo, Córdoba (CP 5960), en un espacio climatizado, aséptico y privado con fácil estacionamiento al frente."
   },
   {
     category: "equipamiento",

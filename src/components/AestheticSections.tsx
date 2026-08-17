@@ -677,9 +677,11 @@ export const LocationAndFAQSection: React.FC = () => {
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
                 {[
                   { id: 'todos', label: 'Todas' },
+                  { id: 'medicina', label: 'Dra. Gelso (Medicina)' },
                   { id: 'turnos', label: 'Turnos & Pagos' },
-                  { id: 'facial', label: 'Facial & Botox' },
-                  { id: 'laser', label: 'Depilación Láser' },
+                  { id: 'faciales', label: 'Facial & Alquimia' },
+                  { id: 'depilacion', label: 'Depilación Láser' },
+                  { id: 'equipamiento', label: 'Aparatología' },
                   { id: 'kinesiologia', label: 'Kinesiología' },
                 ].map((cat) => (
                   <button
@@ -687,7 +689,7 @@ export const LocationAndFAQSection: React.FC = () => {
                     onClick={() => setFaqCategory(cat.id)}
                     className={`px-3 py-1 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
                       faqCategory === cat.id
-                        ? 'bg-[#2c2725] text-white'
+                        ? 'bg-[#2c2725] text-white font-bold'
                         : 'bg-white text-[#6b6462] border border-[#ede8e3] hover:border-[#c98a92]'
                     }`}
                   >
