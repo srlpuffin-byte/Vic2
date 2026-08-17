@@ -32,6 +32,10 @@ import {
 } from '../data/aestheticData';
 import { Testimonial } from '../types';
 import { VicLogo } from './VicLogo';
+import trendsLaserImg from '../assets/images/trends_laser_hq_1786925645941.jpg';
+import eclerisMinivacImg from '../assets/images/ecleris_minivac_hq_1786925657706.jpg';
+import clinicCabinImg from '../assets/images/clinic_cabin_real_hq_1786925708727.jpg';
+import velaslimPlusImg from '../assets/images/velaslim_plus_hq_1786925678666.jpg';
 
 interface HeroSectionProps {
   onOpenBooking: () => void;
@@ -53,28 +57,28 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       name: 'Láser 4 Ondas (Trends)',
       tag: 'Depilación Médica Definitiva',
       desc: '755, 808, 940 y 1064nm simultáneos con cabezal ultra-enfriado bajo cero para sesiones 100% indoloras.',
-      image: 'https://images.unsplash.com/photo-1512290900672-1f4a9b2fc4bb?q=80&w=1000&auto=format&fit=crop',
+      image: trendsLaserImg,
       badge: 'Jornadas los Jueves'
     },
     {
       name: 'Alquimia (Ecleris MiniVac)',
       tag: 'Cosmetología & Hidrodermoabrasión',
       desc: 'Higiene profunda, exfoliación diamantada, succión indolora e infusión de sérums concentrados.',
-      image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=1000&auto=format&fit=crop',
+      image: eclerisMinivacImg,
       badge: 'Efecto Glow Inmediato'
     },
     {
       name: 'Medicina Estética (Dra. Gelso)',
       tag: 'Toxina Botulínica & Hialurónico',
       desc: 'Armonización facial, arrugas de expresión, perfilado labial y bioestimuladores de colágeno.',
-      image: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=1000&auto=format&fit=crop',
+      image: clinicCabinImg,
       badge: 'Supervisión Médica'
     },
     {
       name: 'VelaSlim Plus & Alpha Synergy',
       tag: 'Contorno Corporal & Celulitis',
       desc: 'Radiofrecuencia multipolar, vacumterapia dinámica, rodillos y luz infrarroja para reducción y tensado.',
-      image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1000&auto=format&fit=crop',
+      image: velaslimPlusImg,
       badge: 'Alta Potencia'
     }
   ];

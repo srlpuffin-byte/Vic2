@@ -12,7 +12,6 @@ import {
 } from './components/AestheticSections';
 import { ClinicTourAndAmenities } from './components/ClinicTourAndAmenities';
 import { ClinicalEquipmentSection } from './components/ClinicalEquipmentSection';
-import { VicExecutiveBanner } from './components/VicExecutiveBanner';
 import { ServiceCatalog } from './components/ServiceCatalog';
 import { SmartSkinDiagnosis } from './components/SmartSkinDiagnosis';
 import { BeforeAfterGallery } from './components/BeforeAfterGallery';
@@ -25,7 +24,7 @@ import { LuxuryConciergeModal } from './components/LuxuryConciergeModal';
 import { ActiveIngredientsModal } from './components/ActiveIngredientsModal';
 import { LuxurySensoryAudio } from './components/LuxurySensoryAudio';
 import { SystemManagementModal } from './components/SystemManagementModal';
-import { MessageCircle, Calendar, CalendarCheck, ShieldCheck, Gift } from 'lucide-react';
+import { MessageCircle, ShieldCheck, Gift } from 'lucide-react';
 import { BUSINESS_DATA, TESTIMONIALS_DATA, SERVICES_DATA } from './data/aestheticData';
 import { ServiceItem, Testimonial } from './types';
 import { useGsapAnimations } from './utils/useGsapAnimations';
@@ -146,14 +145,6 @@ export function App() {
           onOpenConcierge={() => setIsConciergeOpen(true)}
         />
 
-        {/* 1.5. Official Executive Clinical Hub Banner matching reference */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 sm:-mt-8 mb-16 relative z-20">
-          <VicExecutiveBanner
-            onOpenBooking={() => handleOpenBooking()}
-            onOpenSystem={(tab) => handleOpenSystem(tab)}
-          />
-        </section>
-
         {/* 2. Key Highlights & Medical Standards */}
         <HighlightsSection />
 
@@ -208,42 +199,21 @@ export function App() {
       {/* Ambient Sensory Audio Relax Button (Bottom Left) */}
       <LuxurySensoryAudio />
 
-      {/* Floating Action Buttons (Bottom Right) */}
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2.5 gsap-floating-actions">
-        
-        {/* Patient Portal Floating Button */}
-        <button
-          onClick={() => handleOpenSystem('client-portal')}
-          className="hidden sm:flex items-center gap-2 bg-[#f5ede5] hover:bg-[#ede0d4] text-[#9a5b63] border border-[#ede8e3] px-3.5 py-2 rounded-full shadow-lg transition-all text-xs font-bold uppercase tracking-wider cursor-pointer active:scale-95"
-          title="Consultá tus turnos agendados o saldo de Gift Card"
-        >
-          <CalendarCheck className="w-4 h-4 text-[#c98a92]" />
-          <span>Mis Turnos</span>
-        </button>
-
-        {/* Direct Booking Floating Pill */}
-        <button
-          onClick={() => handleOpenBooking()}
-          className="hidden md:flex items-center gap-2 bg-[#2c2725] text-white px-4 py-3 rounded-full shadow-xl hover:bg-[#c98a92] transition-all text-xs font-bold uppercase tracking-wider cursor-pointer active:scale-95"
-          title="Reservar Turno"
-        >
-          <Calendar className="w-4 h-4 text-[#c98a92]" />
-          <span>Turnos Online</span>
-        </button>
-
+      {/* Floating Action Button (Bottom Right) */}
+      <div className="fixed bottom-6 right-6 z-40 gsap-floating-actions">
         {/* WhatsApp Direct Chat Button / Pill */}
         <a
           href={BUSINESS_DATA.whatsappLink}
           target="_blank"
           rel="noreferrer"
-          className="flex items-center gap-2.5 bg-[#c98a92] hover:bg-[#b57a82] text-white px-4 py-2.5 rounded-full shadow-2xl transition-all cursor-pointer group active:scale-95 whitespace-nowrap"
-          title="¿Necesitás ayuda con tu turno? Escribinos por WhatsApp"
+          className="flex items-center gap-2.5 bg-[#25D366] hover:bg-[#20ba5a] text-white px-4 py-3 rounded-full shadow-2xl transition-all cursor-pointer group active:scale-95 whitespace-nowrap"
+          title="¿Tenés dudas o querés reservar? Escribinos por WhatsApp"
           aria-label="WhatsApp"
         >
-          <span className="text-xs font-semibold tracking-wide whitespace-nowrap hidden xs:inline">
-            ¿Necesitás ayuda con tu turno?
+          <span className="text-xs font-semibold tracking-wide whitespace-nowrap hidden sm:inline">
+            ¿Tenés dudas? Escribinos
           </span>
-          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+          <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0">
             <MessageCircle className="w-4 h-4 fill-white text-transparent" />
           </div>
         </a>

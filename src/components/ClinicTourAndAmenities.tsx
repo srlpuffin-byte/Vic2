@@ -14,6 +14,11 @@ import {
 } from 'lucide-react';
 import { BUSINESS_DATA } from '../data/aestheticData';
 import { CustomPhotoStorage } from '../utils/customPhotoStorage';
+import clinicCabinImg from '../assets/images/clinic_cabin_real_hq_1786925708727.jpg';
+import eclerisMinivacImg from '../assets/images/ecleris_minivac_hq_1786925657706.jpg';
+import velaslimPlusImg from '../assets/images/velaslim_plus_hq_1786925678666.jpg';
+import trendsLaserImg from '../assets/images/trends_laser_hq_1786925645941.jpg';
+import teslagenDuoImg from '../assets/images/teslagen_duo_hq_1786925695584.jpg';
 
 interface SpaceItem {
   id: string;
@@ -31,7 +36,7 @@ const CLINIC_SPACES: SpaceItem[] = [
     name: 'Consultorio de Medicina Estética',
     category: 'Dra. María Pía Gelso',
     description: 'Espacio médico exclusivo y aséptico para procedimientos de armonización facial, toxina botulínica, ácido hialurónico y bioestimuladores de colágeno.',
-    image: '/images/clinic_cabin_real.jpg',
+    image: clinicCabinImg,
     features: [
       'Atención médica personalizada y diagnóstico facial anatómico',
       'Materiales inyectables estériles de primeras marcas internacionales',
@@ -45,7 +50,7 @@ const CLINIC_SPACES: SpaceItem[] = [
     name: 'Cabina Facial & Alquimia MiniVac',
     category: 'Hidrodermoabrasión & Cosmiatría',
     description: 'Espacio íntimo acondicionado con luz tenue, música relajante y aparatología médica de infusión activa transdérmica para revitalizar tu piel en profundidad.',
-    image: '/images/ecleris_minivac.jpg',
+    image: eclerisMinivacImg,
     features: [
       'Sistema Alquimia (Ecleris MiniVac) de hidrodermoabrasión e infusión activa',
       'Radiofrecuencia fraccionada facial y Luz Pulsada Intensa (IPL)',
@@ -59,7 +64,7 @@ const CLINIC_SPACES: SpaceItem[] = [
     name: 'Sector de Modelación Corporal de Alta Potencia',
     category: 'VelaSlim, Alpha Synergy & Teslagen DUO',
     description: 'Gabinete de alta tecnología enfocado en reducción de panículo adiposo, tensado dérmico, eliminación de celulitis y tonificación muscular supramáxima.',
-    image: '/images/velaslim_plus.jpg',
+    image: velaslimPlusImg,
     features: [
       'VelaSlim Plus: Radiofrecuencia + Vacumterapia + Rodillos mecánicos + Infrarrojo',
       'Alpha Synergy (Starbene): Radiofrecuencia multipolar profunda con vacum',
@@ -73,7 +78,7 @@ const CLINIC_SPACES: SpaceItem[] = [
     name: 'Sector Láser 4 Longitudes de Onda (Trends)',
     category: 'Depilación Definitiva & Fotorejuvenecimiento',
     description: 'Tecnología médica Trends de 4 ondas simultáneas (755nm, 808nm, 940nm, 1064nm) con cabezal ultra-enfriado bajo cero para una sesión 100% indolora y segura.',
-    image: '/images/trends_laser.jpg',
+    image: trendsLaserImg,
     features: [
       'Cabezal ergonómico con enfriamiento criogénico de contacto',
       'Eficacia probada en todo fototipo cutáneo y grosor de vello',
@@ -87,7 +92,7 @@ const CLINIC_SPACES: SpaceItem[] = [
     name: 'Consultorio de Fisioterapia, Kinesiología & Nutrición',
     category: 'Lic. Olga Aguirre & Nadia Tissera',
     description: 'Área dedicada a la rehabilitación funcional, alivio del dolor crónico, drenaje linfático manual y planes nutricionales para un bienestar integral.',
-    image: '/images/teslagen_duo.jpg',
+    image: teslagenDuoImg,
     features: [
       'Evaluación postural, articular y miofascial por profesional matriculada',
       'Drenaje linfático médico para retención de líquidos y post-operatorios',

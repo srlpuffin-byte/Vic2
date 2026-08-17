@@ -1,4 +1,10 @@
 import { BusinessInfo, CategoryItem, ServiceItem, Professional, Testimonial } from '../types';
+import trendsLaserImg from '../assets/images/trends_laser_hq_1786925645941.jpg';
+import eclerisMinivacImg from '../assets/images/ecleris_minivac_hq_1786925657706.jpg';
+import starbeneAlphaImg from '../assets/images/starbene_alpha_hq_1786925668298.jpg';
+import velaslimPlusImg from '../assets/images/velaslim_plus_hq_1786925678666.jpg';
+import teslagenDuoImg from '../assets/images/teslagen_duo_hq_1786925695584.jpg';
+import clinicCabinImg from '../assets/images/clinic_cabin_real_hq_1786925708727.jpg';
 
 export interface ClinicalProtocol {
   serviceId: string;
@@ -59,7 +65,7 @@ export const EQUIPMENT_DATA: EquipmentItem[] = [
     sessionDuration: "15 a 60 min según zona",
     frequency: "1 sesión cada 30 a 45 días (6 a 8 sesiones totales recomendadas)",
     relatedServiceId: "srv-dep-1",
-    image: "/images/trends_laser.jpg"
+    image: trendsLaserImg
   },
   {
     id: "eq-ecleris-minivac",
@@ -87,7 +93,7 @@ export const EQUIPMENT_DATA: EquipmentItem[] = [
     sessionDuration: "45 a 60 min",
     frequency: "1 sesión cada 21 a 30 días para mantenimiento celular",
     relatedServiceId: "srv-fac-alquimia",
-    image: "/images/ecleris_minivac.jpg"
+    image: eclerisMinivacImg
   },
   {
     id: "eq-velaslim-plus",
@@ -114,7 +120,7 @@ export const EQUIPMENT_DATA: EquipmentItem[] = [
     sessionDuration: "45 min por sesión",
     frequency: "1 a 2 sesiones semanales (plan inicial recomendado: 6 a 8 sesiones)",
     relatedServiceId: "srv-corp-velaslim",
-    image: "/images/velaslim_plus.jpg"
+    image: velaslimPlusImg
   },
   {
     id: "eq-starbene-alpha",
@@ -141,7 +147,7 @@ export const EQUIPMENT_DATA: EquipmentItem[] = [
     sessionDuration: "45 min",
     frequency: "1 sesión semanal o quincenal",
     relatedServiceId: "srv-corp-alpha",
-    image: "/images/starbene_alpha.jpg"
+    image: starbeneAlphaImg
   },
   {
     id: "eq-teslagen-duo",
@@ -168,7 +174,7 @@ export const EQUIPMENT_DATA: EquipmentItem[] = [
     sessionDuration: "30 a 35 min",
     frequency: "2 sesiones semanales durante 4 a 6 semanas",
     relatedServiceId: "srv-corp-teslagen",
-    image: "/images/teslagen_duo.jpg"
+    image: teslagenDuoImg
   },
   {
     id: "eq-consultorio-vic",
@@ -195,7 +201,7 @@ export const EQUIPMENT_DATA: EquipmentItem[] = [
     sessionDuration: "Según tratamiento",
     frequency: "Atención con turno coordinado",
     relatedServiceId: "srv-fac-higiene",
-    image: "/images/clinic_cabin_real.jpg"
+    image: clinicCabinImg
   }
 ];
 
