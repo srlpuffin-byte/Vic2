@@ -13,11 +13,13 @@ import {
   Calendar,
   Download,
   Printer,
-  Heart,
   Palette,
-  ExternalLink,
   MessageCircle,
-  Eye
+  Clock,
+  Send,
+  AlertCircle,
+  Phone,
+  UserCheck
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { BUSINESS_DATA, formatPrice } from '../data/aestheticData';
@@ -53,6 +55,8 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
   const [cardType, setCardType] = useState<'amount' | 'treatment'>('amount');
   const [recipient, setRecipient] = useState('');
   const [sender, setSender] = useState('');
+  const [senderPhone, setSenderPhone] = useState('');
+  const [recipientPhone, setRecipientPhone] = useState('');
   const [amount, setAmount] = useState('35000');
   const [customAmount, setCustomAmount] = useState('');
   const [isCustomAmount, setIsCustomAmount] = useState(false);
@@ -67,8 +71,21 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
   const [generatedCard, setGeneratedCard] = useState<GiftCardItem | null>(null);
   const [copied, setCopied] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Sync with localStorage updates (e.g. when staff approves in another tab/modal)
+  useEffect(() => {
+    const handleDataUpdate = () => {
+      if (generatedCard) {
+        const fresh = SystemStorage.getGiftCardByCode(generatedCard.code);
+        if (fresh) {
+          setGeneratedCard(fresh);
+        }
+      }
+    };
+    window.addEventListener('vic_data_updated', handleDataUpdate);
+    return () => window.removeEventListener('vic_data_updated', handleDataUpdate);
+  }, [generatedCard]);
 
   // Load existing card if provided via initialCode
   useEffect(() => {
@@ -84,7 +101,6 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
   useEffect(() => {
     if (!isOpen) {
       setGeneratedCard(null);
-      setPreviewImage(null);
       setIsFlipped(false);
       return;
     }
@@ -132,7 +148,7 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
     }
   };
 
-  const handleCreateAndSaveGiftCard = async (openWhatsApp = false) => {
+  const handleCreateAndRequestGiftCard = async () => {
     const chosenAmount = isCustomAmount 
       ? (parseFloat(customAmount) || 35000) 
       : (parseFloat(amount) || 35000);
@@ -140,40 +156,48 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
     const recipientClean = recipient.trim() || 'Alguien Especial';
     const senderClean = sender.trim() || 'Un Ser Querido';
 
+    // When created by client, starts in 'pending_approval' until Staff verifies in panel
     const newCard: GiftCardItem = {
       code: voucherId,
       cardType: cardType,
       recipientName: recipientClean,
       senderName: senderClean,
+      senderPhone: senderPhone.trim() || undefined,
+      recipientPhone: recipientPhone.trim() || undefined,
       initialBalance: numericAmount,
       remainingBalance: numericAmount,
       treatmentName: cardType === 'treatment' ? treatment : undefined,
       message: message.trim() || '¡Una experiencia única de bienestar y relax en VIC!',
-      status: 'active',
+      status: 'pending_approval',
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
       usageHistory: []
     };
 
-    // Save to Local System Storage
+    // Save to System Storage
     SystemStorage.saveGiftCard(newCard);
     setGeneratedCard(newCard);
     triggerCelebration();
 
-    // Pre-generate image preview
-    try {
-      const imgData = await generateGiftCardCanvas(newCard, selectedThemeId);
-      setPreviewImage(imgData);
-    } catch (e) {
-      console.error(e);
-    }
+    // Notify staff via WhatsApp so they can review and approve immediately
+    const staffNotice = 
+      `👋 *¡HOLA STAFF VIC! NUEVA SOLICITUD DE GIFT CARD*\n\n` +
+      `🎫 *Código:* \`${newCard.code}\`\n` +
+      `👤 *Comprador/a:* ${newCard.senderName} ${newCard.senderPhone ? `(${newCard.senderPhone})` : ''}\n` +
+      `🌸 *Para:* ${newCard.recipientName}\n` +
+      `💰 *Obsequio:* ${newCard.cardType === 'treatment' ? newCard.treatmentName : formatPrice(newCard.initialBalance)}\n` +
+      `💌 *Mensaje:* "${newCard.message}"\n\n` +
+      `Por favor confirmar el pago/recepción en el panel de gestión para habilitar el envío oficial a la clienta. ✨`;
 
-    if (openWhatsApp) {
-      handleSendWhatsAppGift(newCard);
-    }
+    window.open(`https://wa.me/${BUSINESS_DATA.phone}?text=${encodeURIComponent(staffNotice)}`, '_blank');
   };
 
   const handleSendWhatsAppGift = (card: GiftCardItem) => {
+    if (card.status === 'pending_approval') {
+      alert('Esta Gift Card está pendiente de confirmación por parte del equipo de VIC. Una vez confirmada podrás enviarla.');
+      return;
+    }
+
     const giftDetail = card.cardType === 'treatment' 
       ? `💆‍♀️ *Tratamiento Obsequiado:* ${card.treatmentName}` 
       : `💰 *Monto de Regalo:* ${formatPrice(card.initialBalance)}`;
@@ -188,20 +212,13 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
       `⏳ *Vigencia:* 90 días corridos\n` +
       `📍 *Lugar:* Mendoza 985, Río Segundo, Córdoba\n\n` +
       `🌟 *¿Cómo canjearlo?*\n` +
-      `Presentá este código o agendá tu turno online en nuestro sitio web o enviando un WhatsApp a la clínica. ¡Te esperamos para una experiencia inolvidable! 💖`;
+      `Presentá este código al asistir o ingresalo al agendar tu turno online en nuestro sitio web. ¡Te esperamos para una experiencia inolvidable! 💖`;
 
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleCopyGiftLink = (code: string) => {
-    const url = `${window.location.origin}/#giftcard-${code}`;
-    navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -220,6 +237,10 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
 
   const handleNativeShare = async () => {
     if (!generatedCard) return;
+    if (generatedCard.status === 'pending_approval') {
+      alert('Esta tarjeta está pendiente de confirmación del staff de VIC.');
+      return;
+    }
     const shareText = `🎁 ¡Hola ${generatedCard.recipientName}! ${generatedCard.senderName} te ha regalado una Gift Card exclusiva de VIC Estética Integral (Código: ${generatedCard.code}) en Mendoza 985, Río Segundo.`;
     
     if (navigator.share) {
@@ -243,6 +264,8 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
 
   if (!isOpen) return null;
 
+  const isApproved = generatedCard?.status === 'active' || generatedCard?.status === 'partially_used';
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2c2725]/75 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
       <div className="bg-[#fcfaf7] w-full max-w-2xl rounded-3xl shadow-2xl border border-[#ede8e3] overflow-hidden flex flex-col my-auto max-h-[94vh]">
@@ -255,12 +278,18 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
             </div>
             <div>
               <h3 className="font-serif-cormorant text-xl sm:text-2xl font-bold text-[#2c2725] leading-tight flex items-center gap-2">
-                <span>{generatedCard ? '¡Tu Gift Card de Regalo está Lista!' : 'Crear Gift Card Personalizada'}</span>
+                <span>
+                  {generatedCard 
+                    ? (isApproved ? '¡Gift Card Confirmada & Lista para Enviar!' : 'Solicitud de Gift Card Generada') 
+                    : 'Crear Gift Card Personalizada'}
+                </span>
                 {generatedCard && <Sparkles className="w-4 h-4 text-[#c98a92]" />}
               </h3>
               <p className="text-xs text-[#6b6462]">
                 {generatedCard 
-                  ? 'Diseño generado en alta definición. Lista para enviar, descargar o regalar.' 
+                  ? (isApproved 
+                      ? 'Tu tarjeta fue aprobada por el staff. Ya podés enviarla a la agasajada por WhatsApp o descargarla.' 
+                      : 'Diseño listo. El staff de VIC confirmará el voucher para habilitar su envío y canje.') 
                   : 'Elegí el diseño, dedicatoria y tratamiento para obsequiar a esa persona especial.'}
               </p>
             </div>
@@ -278,16 +307,46 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
         {generatedCard ? (
           <div className="p-6 overflow-y-auto space-y-6">
             
-            {/* Header Success Badge */}
-            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex items-center justify-between">
-              <div className="flex items-center gap-2.5 text-xs text-emerald-800 font-medium">
-                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Tarjeta registrada con éxito en el sistema oficial de VIC Estética.</span>
+            {/* Status Banner */}
+            {isApproved ? (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-2.5 text-xs text-emerald-900 font-medium">
+                  <Check className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <div>
+                    <strong className="block text-emerald-950 font-bold">¡Voucher Confirmado & Habilitado!</strong>
+                    <span>La tarjeta ya se encuentra activa para ser enviada o canjeada presencialmente / online.</span>
+                  </div>
+                </div>
+                <span className="text-[11px] font-mono font-bold bg-emerald-600 text-white px-3 py-1 rounded-full shadow-2xs shrink-0">
+                  {generatedCard.code}
+                </span>
               </div>
-              <span className="text-[11px] font-mono font-bold bg-emerald-600 text-white px-2.5 py-0.5 rounded-full shadow-2xs">
-                {generatedCard.code}
-              </span>
-            </div>
+            ) : (
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-start gap-2.5 text-xs text-amber-900 font-medium">
+                  <Clock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="block text-amber-950 font-bold">Pendiente de Confirmación Staff</strong>
+                    <span>El diseño está listo. Recepción validará el pago para activar el botón de envío a la agasajada.</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[11px] font-mono font-bold bg-amber-600 text-white px-2.5 py-1 rounded-full">
+                    {generatedCard.code}
+                  </span>
+                  <a
+                    href={`https://wa.me/${BUSINESS_DATA.phone}?text=Hola!%20Acabo%20de%20generar%20la%20Gift%20Card%20${generatedCard.code}%20para%20${encodeURIComponent(generatedCard.recipientName)}.%20Aguardamos%20su%20confirmaci%C3%B3n.`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-1.5 bg-white border border-amber-300 rounded-xl text-[11px] font-bold text-amber-900 hover:bg-amber-100 flex items-center gap-1"
+                    title="Notificar por WhatsApp a Recepción"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
+                    <span>Avisar</span>
+                  </a>
+                </div>
+              </div>
+            )}
 
             {/* Generated Card Interactive Showcase */}
             <div className="flex flex-col items-center">
@@ -353,7 +412,7 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
                         style={{ backgroundColor: activeTheme.badgeBg, borderColor: activeTheme.foilColor }}
                         className="px-3 py-1.5 rounded-2xl backdrop-blur-md flex items-center justify-center font-serif-cormorant font-bold text-xs border shadow-xs"
                       >
-                        GIFT VOUCHER
+                        {isApproved ? 'GIFT VOUCHER ACTIVO' : 'VOUCHER PENDIENTE'}
                       </div>
                     </div>
 
@@ -393,7 +452,7 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
                     <div className="flex justify-between items-center z-10 border-b border-white/10 pb-2">
                       <div className="text-[10px] uppercase tracking-widest text-[#c98a92] font-bold flex items-center gap-1.5">
                         <ShieldCheck className="w-3.5 h-3.5" />
-                        <span>Seguridad & Canje Oficial</span>
+                        <span>{isApproved ? 'Seguridad & Canje Habilitado' : 'Validación en Proceso'}</span>
                       </div>
                       <div className="text-[11px] text-white/90 font-mono font-bold bg-white/10 px-2 py-0.5 rounded border border-white/10">
                         {generatedCard.code}
@@ -430,21 +489,28 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
               </div>
             </div>
 
-            {/* SEND AS GIFT ACTION BUTTONS */}
+            {/* SEND AS GIFT ACTION BUTTONS (Gated by Staff Confirmation) */}
             <div className="space-y-3 pt-2">
               <span className="text-[10px] font-bold text-[#6b6462] uppercase tracking-wider block text-center">
-                Opciones para enviar y regalar a la agasajada
+                {isApproved 
+                  ? 'Opciones para enviar y regalar a la agasajada' 
+                  : 'Acciones disponibles tras la confirmación de recepción'}
               </span>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {/* 1. Send via WhatsApp */}
+                {/* 1. Send via WhatsApp (Active only when approved) */}
                 <button
                   type="button"
                   onClick={() => handleSendWhatsAppGift(generatedCard)}
-                  className="py-3.5 px-4 bg-[#25D366] hover:bg-[#20ba59] text-white rounded-2xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-md hover:shadow-lg transition-all active:scale-98"
+                  disabled={!isApproved}
+                  className={`py-3.5 px-4 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                    isApproved
+                      ? 'bg-[#25D366] hover:bg-[#20ba59] text-white cursor-pointer shadow-md hover:shadow-lg active:scale-98'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-300'
+                  }`}
                 >
-                  <MessageCircle className="w-4 h-4 fill-white" />
-                  <span>Enviar por WhatsApp a la Agasajada</span>
+                  <MessageCircle className="w-4 h-4 fill-current" />
+                  <span>{isApproved ? 'Enviar por WhatsApp a la Agasajada' : 'Enviar por WhatsApp (Requiere Confirmación)'}</span>
                 </button>
 
                 {/* 2. Download Image (PNG HD) */}
@@ -462,7 +528,12 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
                 <button
                   type="button"
                   onClick={handleNativeShare}
-                  className="py-3 px-4 bg-[#2c2725] hover:bg-black text-white rounded-2xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all"
+                  disabled={!isApproved}
+                  className={`py-3 px-4 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                    isApproved
+                      ? 'bg-[#2c2725] hover:bg-black text-white cursor-pointer shadow-xs'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
                 >
                   <Share2 className="w-4 h-4 text-[#c98a92]" />
                   <span>Compartir en Redes / Mensajes</span>
@@ -490,7 +561,7 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
                   <span>Imprimir para sobre de regalo</span>
                 </button>
 
-                {onOpenBookingWithGiftCard && (
+                {isApproved && onOpenBookingWithGiftCard && (
                   <button
                     type="button"
                     onClick={() => {
@@ -731,6 +802,30 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
                 </div>
               </div>
 
+              {/* Optional Phone Contact Inputs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#6b6462] uppercase mb-1">Tu Teléfono / WhatsApp</label>
+                  <input
+                    type="tel"
+                    placeholder="Ej: 3572 403949"
+                    value={senderPhone}
+                    onChange={(e) => setSenderPhone(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#fcfaf7] border border-[#ede8e3] rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-[#c98a92]/40 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#6b6462] uppercase mb-1">Teléfono Agasajada (Opcional)</label>
+                  <input
+                    type="tel"
+                    placeholder="Ej: 3572 123456"
+                    value={recipientPhone}
+                    onChange={(e) => setRecipientPhone(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#fcfaf7] border border-[#ede8e3] rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-[#c98a92]/40 outline-none"
+                  />
+                </div>
+              </div>
+
               {/* Amount Selection */}
               {cardType === 'amount' ? (
                 <div>
@@ -818,21 +913,15 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
             <div className="space-y-2.5">
               <button
                 type="button"
-                onClick={() => handleCreateAndSaveGiftCard(false)}
+                onClick={handleCreateAndRequestGiftCard}
                 className="w-full py-4 rounded-2xl bg-[#c98a92] hover:bg-[#b57a82] text-white text-xs sm:text-sm font-bold uppercase tracking-widest transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 cursor-pointer active:scale-98"
               >
                 <Gift className="w-4 h-4" />
-                <span>Generar Tarjeta de Regalo Oficial</span>
+                <span>Generar Tarjeta & Notificar al Staff para Confirmar</span>
               </button>
-
-              <button
-                type="button"
-                onClick={() => handleCreateAndSaveGiftCard(true)}
-                className="w-full py-2.5 rounded-2xl bg-white border border-[#ede8e3] hover:border-[#25D366] text-[#2c2725] text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors"
-              >
-                <MessageCircle className="w-4 h-4 text-[#25D366]" />
-                <span>Generar y Enviar Directo por WhatsApp</span>
-              </button>
+              <p className="text-[11px] text-[#8a807d] text-center">
+                Al generar la tarjeta, el staff de VIC confirmará el voucher en recepción para que puedas enviarlo a la agasajada.
+              </p>
             </div>
 
           </div>

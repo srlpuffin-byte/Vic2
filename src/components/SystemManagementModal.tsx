@@ -88,6 +88,7 @@ export const SystemManagementModal: React.FC<SystemManagementModalProps> = ({
   const [appointmentStatusFilter, setAppointmentStatusFilter] = useState<string>('all');
 
   // Gift card validation state (Staff Tab 2)
+  const [gcStatusFilter, setGcStatusFilter] = useState<'all' | 'pending_approval' | 'active' | 'partially_used' | 'used'>('all');
   const [validationCode, setValidationCode] = useState('');
   const [validatedCard, setValidatedCard] = useState<GiftCardItem | null>(null);
   const [validationFeedback, setValidationFeedback] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
@@ -295,7 +296,12 @@ export const SystemManagementModal: React.FC<SystemManagementModalProps> = ({
     setValidationCode(card.code);
     setRedemptionAmount(card.remainingBalance.toString());
 
-    if (card.status === 'used' || card.remainingBalance <= 0) {
+    if (card.status === 'pending_approval') {
+      setValidationFeedback({ 
+        type: 'info', 
+        message: `Voucher pendiente de confirmación. Hacé clic en "Confirmar & Habilitar Voucher" para activarlo.` 
+      });
+    } else if (card.status === 'used' || card.remainingBalance <= 0) {
       setValidationFeedback({ 
         type: 'info', 
         message: 'Esta Gift Card ya ha sido canjeada en su totalidad ($0 saldo).' 
@@ -303,8 +309,32 @@ export const SystemManagementModal: React.FC<SystemManagementModalProps> = ({
     } else {
       setValidationFeedback({ 
         type: 'success', 
-        message: `¡Gift Card válida! Saldo disponible: ${formatPrice(card.remainingBalance)}.` 
+        message: `¡Gift Card activa! Saldo disponible: ${formatPrice(card.remainingBalance)}.` 
       });
+    }
+  };
+
+  const handleApproveCard = (code: string) => {
+    const result = SystemStorage.approveGiftCard(code, 'Staff Recepción');
+    if (result.success) {
+      setValidationFeedback({ type: 'success', message: result.message });
+      if (validatedCard?.code === code && result.card) {
+        setValidatedCard(result.card);
+      }
+      refreshData();
+    } else {
+      setValidationFeedback({ type: 'error', message: result.message });
+    }
+  };
+
+  const handleDeleteCard = (code: string) => {
+    if (confirm(`¿Deseás eliminar el voucher ${code}?`)) {
+      SystemStorage.deleteGiftCard(code);
+      if (validatedCard?.code === code) {
+        setValidatedCard(null);
+        setValidationFeedback(null);
+      }
+      refreshData();
     }
   };
 
@@ -786,10 +816,10 @@ export const SystemManagementModal: React.FC<SystemManagementModalProps> = ({
                 <div className="bg-white p-5 rounded-2xl border border-[#ede8e3] shadow-xs space-y-4">
                   <div>
                     <h3 className="font-serif-cormorant text-xl font-bold text-[#2c2725]">
-                      Validador & Canje en Mostrador
+                      Validador, Confirmación & Canje de Vouchers
                     </h3>
                     <p className="text-xs text-[#6b6462]">
-                      Ingresá el código del voucher para consultar saldo o registrar un débito en caja.
+                      Confirmá las solicitudes de Gift Cards recibidas para habilitar su envío, o registrá débitos en mostrador.
                     </p>
                   </div>
 
@@ -808,7 +838,7 @@ export const SystemManagementModal: React.FC<SystemManagementModalProps> = ({
                       className="px-5 py-2.5 bg-[#c98a92] hover:bg-[#b57a82] text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors flex items-center gap-1.5 shadow-xs"
                     >
                       <Search className="w-3.5 h-3.5" />
-                      <span>Validar</span>
+                      <span>Buscar</span>
                     </button>
                   </div>
 
@@ -829,15 +859,33 @@ export const SystemManagementModal: React.FC<SystemManagementModalProps> = ({
                   {/* Validated Card Details & Debit Form */}
                   {validatedCard && (
                     <div className="bg-[#fbf4eb] border border-[#ede0d4] rounded-2xl p-4 space-y-4">
+                      
+                      {/* Top Header info */}
                       <div className="flex justify-between items-start border-b border-[#ede0d4] pb-3">
                         <div>
-                          <span className="font-mono text-xs font-bold text-[#9a5b63] bg-white px-2 py-0.5 rounded border border-[#f0d4d8]">
-                            {validatedCard.code}
-                          </span>
-                          <h4 className="font-serif-cormorant text-lg font-bold text-[#2c2725] mt-1">
-                            {validatedCard.recipientName}
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs font-bold text-[#9a5b63] bg-white px-2 py-0.5 rounded border border-[#f0d4d8]">
+                              {validatedCard.code}
+                            </span>
+                            <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                              validatedCard.status === 'pending_approval' ? 'bg-amber-100 text-amber-900 border border-amber-300' :
+                              validatedCard.status === 'active' ? 'bg-emerald-100 text-emerald-800' :
+                              validatedCard.status === 'partially_used' ? 'bg-blue-100 text-blue-800' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {validatedCard.status === 'pending_approval' ? '⏳ Pendiente Confirmación' :
+                               validatedCard.status === 'active' ? '✓ Activa' :
+                               validatedCard.status === 'partially_used' ? '✓ Con Saldo' : 'Canjeada'}
+                            </span>
+                          </div>
+
+                          <h4 className="font-serif-cormorant text-lg font-bold text-[#2c2725] mt-1.5">
+                            Para: {validatedCard.recipientName}
                           </h4>
-                          <span className="text-[11px] text-[#6b6462]">De: {validatedCard.senderName}</span>
+                          <p className="text-[11px] text-[#6b6462]">
+                            De: <strong>{validatedCard.senderName}</strong>
+                            {validatedCard.senderPhone && ` · Tel: ${validatedCard.senderPhone}`}
+                          </p>
                         </div>
 
                         <div className="text-right">
@@ -853,15 +901,70 @@ export const SystemManagementModal: React.FC<SystemManagementModalProps> = ({
                         </div>
                       </div>
 
+                      {/* Dedication Message */}
+                      <div className="text-xs bg-white/90 p-3 rounded-xl border border-[#ede8e3] space-y-1">
+                        <span className="text-[#8a807d] block text-[10px] uppercase font-bold">Dedicatoria:</span>
+                        <p className="italic text-[#2c2725]">"{validatedCard.message}"</p>
+                      </div>
+
                       {validatedCard.treatmentName && (
-                        <div className="text-xs bg-white/80 p-2.5 rounded-xl border border-[#ede8e3]">
+                        <div className="text-xs bg-white/90 p-2.5 rounded-xl border border-[#ede8e3]">
                           <span className="text-[#8a807d] block text-[10px] uppercase font-bold">Tratamiento Asignado:</span>
                           <span className="font-bold text-[#2c2725]">{validatedCard.treatmentName}</span>
                         </div>
                       )}
 
-                      {/* Redemption Action */}
-                      {validatedCard.remainingBalance > 0 && (
+                      {/* 1. APPROVAL BOX (If Pending) */}
+                      {validatedCard.status === 'pending_approval' && (
+                        <div className="bg-amber-50/90 border border-amber-300 p-4 rounded-2xl space-y-3">
+                          <div className="flex items-start gap-2">
+                            <AlertCircle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+                            <div>
+                              <h5 className="text-xs font-bold text-amber-950">
+                                Voucher Pendiente de Confirmación Staff
+                              </h5>
+                              <p className="text-[11px] text-amber-800 mt-0.5">
+                                La clienta generó este voucher. Una vez verificado el pago (transferencia o efectivo en mostrador), confirmalo para que pueda enviarlo y canjearlo.
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => handleApproveCard(validatedCard.code)}
+                              className="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer shadow-xs flex items-center gap-1.5 transition-all"
+                            >
+                              <CheckCircle2 className="w-4 h-4" />
+                              <span>Confirmar & Habilitar Voucher Oficial</span>
+                            </button>
+
+                            {validatedCard.senderPhone && (
+                              <a
+                                href={`https://wa.me/${validatedCard.senderPhone.replace(/\D/g, '')}?text=Hola%20${encodeURIComponent(validatedCard.senderName)}!%20Te%20escribimos%20de%20VIC%20Est%C3%A9tica%20por%20tu%20Gift%20Card%20${validatedCard.code}.`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-3.5 py-2.5 bg-[#25D366] hover:bg-[#20ba59] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xs"
+                              >
+                                <MessageCircle className="w-4 h-4" />
+                                <span>Contactar Comprador/a</span>
+                              </a>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteCard(validatedCard.code)}
+                              className="px-3 py-2.5 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Rechazar</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 2. REDEMPTION ACTION (If active & has balance) */}
+                      {validatedCard.status !== 'pending_approval' && validatedCard.remainingBalance > 0 && (
                         <form onSubmit={handleProcessRedemption} className="space-y-3 bg-white p-3.5 rounded-xl border border-[#ede8e3]">
                           <h5 className="text-xs font-bold uppercase tracking-wider text-[#2c2725] flex items-center gap-1.5">
                             <Receipt className="w-3.5 h-3.5 text-[#c98a92]" />
@@ -913,11 +1016,11 @@ export const SystemManagementModal: React.FC<SystemManagementModalProps> = ({
                             {validatedCard.usageHistory.map((item) => (
                               <div key={item.id} className="bg-white p-2 rounded-lg border border-[#ede8e3] flex justify-between items-center">
                                 <div>
-                                  <span className="font-bold text-[#2c2725]">-{formatPrice(item.amount)}</span>
+                                  <span className="font-bold text-[#2c2725]">-{formatPrice(item.amountDeducted)}</span>
                                   <span className="text-[#8a807d] ml-2">{item.notes || 'Canje'}</span>
                                 </div>
                                 <span className="text-[#8a807d] text-[10px]">
-                                  {new Date(item.timestamp).toLocaleDateString('es-AR')}
+                                  {new Date(item.date).toLocaleDateString('es-AR')}
                                 </span>
                               </div>
                             ))}
@@ -935,23 +1038,72 @@ export const SystemManagementModal: React.FC<SystemManagementModalProps> = ({
               <div className="lg:col-span-5 space-y-3">
                 <div className="flex items-center justify-between">
                   <h4 className="font-bold text-xs text-[#2c2725] uppercase tracking-wider">
-                    Todas las Gift Cards ({giftCards.length})
+                    Vouchers Registrados ({giftCards.length})
                   </h4>
                   <span className="text-[11px] text-[#8a807d]">Clic para cargar</span>
                 </div>
 
-                <div className="space-y-2 max-h-[550px] overflow-y-auto pr-1">
-                  {giftCards.map((card) => (
+                {/* Filter Tabs */}
+                <div className="flex gap-1 bg-[#f5ede5] p-1 rounded-xl text-[10px] font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setGcStatusFilter('all')}
+                    className={`flex-1 py-1 rounded-lg transition-colors cursor-pointer ${
+                      gcStatusFilter === 'all' ? 'bg-white text-[#2c2725] shadow-2xs' : 'text-[#6b6462]'
+                    }`}
+                  >
+                    Todos ({giftCards.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGcStatusFilter('pending_approval')}
+                    className={`flex-1 py-1 rounded-lg transition-colors cursor-pointer ${
+                      gcStatusFilter === 'pending_approval' ? 'bg-amber-600 text-white shadow-2xs' : 'text-amber-800'
+                    }`}
+                  >
+                    Pendientes ({giftCards.filter(g => g.status === 'pending_approval').length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGcStatusFilter('active')}
+                    className={`flex-1 py-1 rounded-lg transition-colors cursor-pointer ${
+                      gcStatusFilter === 'active' ? 'bg-white text-[#2c2725] shadow-2xs' : 'text-[#6b6462]'
+                    }`}
+                  >
+                    Activas
+                  </button>
+                </div>
+
+                <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                  {giftCards
+                    .filter(card => {
+                      if (gcStatusFilter === 'all') return true;
+                      if (gcStatusFilter === 'pending_approval') return card.status === 'pending_approval';
+                      if (gcStatusFilter === 'active') return card.status === 'active' || card.status === 'partially_used';
+                      return card.status === gcStatusFilter;
+                    })
+                    .map((card) => (
                     <button
                       key={card.code}
                       onClick={() => handleValidateCard(card.code)}
-                      className="w-full text-left bg-white p-3.5 rounded-2xl border border-[#ede8e3] hover:border-[#c98a92] transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                      className={`w-full text-left bg-white p-3.5 rounded-2xl border transition-all cursor-pointer shadow-2xs hover:shadow-xs group ${
+                        card.status === 'pending_approval' 
+                          ? 'border-amber-300 bg-amber-50/40 hover:border-amber-400' 
+                          : 'border-[#ede8e3] hover:border-[#c98a92]'
+                      }`}
                     >
                       <div className="flex justify-between items-start">
                         <div>
-                          <span className="font-mono text-[10px] font-bold text-[#9a5b63] bg-[#fbf0f2] px-2 py-0.5 rounded border border-[#f0d4d8]">
-                            {card.code}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-mono text-[10px] font-bold text-[#9a5b63] bg-[#fbf0f2] px-2 py-0.5 rounded border border-[#f0d4d8]">
+                              {card.code}
+                            </span>
+                            {card.status === 'pending_approval' && (
+                              <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-full bg-amber-500 text-white animate-pulse">
+                                Por Confirmar
+                              </span>
+                            )}
+                          </div>
                           <h5 className="font-bold text-xs text-[#2c2725] mt-1 group-hover:text-[#c98a92] transition-colors">
                             {card.recipientName}
                           </h5>
@@ -963,11 +1115,14 @@ export const SystemManagementModal: React.FC<SystemManagementModalProps> = ({
                             {formatPrice(card.remainingBalance)}
                           </span>
                           <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-full inline-block mt-0.5 ${
+                            card.status === 'pending_approval' ? 'bg-amber-100 text-amber-900 border border-amber-300' :
                             card.status === 'active' ? 'bg-emerald-100 text-emerald-800' :
-                            card.status === 'partially_used' ? 'bg-amber-100 text-amber-800' :
+                            card.status === 'partially_used' ? 'bg-blue-100 text-blue-800' :
                             'bg-gray-100 text-gray-600'
                           }`}>
-                            {card.status === 'active' ? 'Activa' : card.status === 'partially_used' ? 'Con Saldo' : 'Canjeada'}
+                            {card.status === 'pending_approval' ? 'Pendiente' :
+                             card.status === 'active' ? 'Activa' : 
+                             card.status === 'partially_used' ? 'Con Saldo' : 'Canjeada'}
                           </span>
                         </div>
                       </div>
@@ -1266,12 +1421,18 @@ export const SystemManagementModal: React.FC<SystemManagementModalProps> = ({
                     </div>
 
                     <div className="text-right">
-                      <span className="text-[10px] uppercase font-bold text-[#8a807d] block">Saldo Disponible</span>
+                      <span className="text-[10px] uppercase font-bold text-[#8a807d] block">
+                        {clientGcResult.status === 'pending_approval' ? 'Estado' : 'Saldo Disponible'}
+                      </span>
                       <span className="text-2xl font-bold text-[#2c2725]">
                         {formatPrice(clientGcResult.remainingBalance)}
                       </span>
-                      <span className="text-[10px] text-emerald-700 font-bold block">
-                        {clientGcResult.remainingBalance > 0 ? '✓ Tarjeta con saldo activo' : 'Canjeada en su totalidad'}
+                      <span className={`text-[10px] font-bold block ${
+                        clientGcResult.status === 'pending_approval' ? 'text-amber-700' :
+                        clientGcResult.remainingBalance > 0 ? 'text-emerald-700' : 'text-gray-500'
+                      }`}>
+                        {clientGcResult.status === 'pending_approval' ? '⏳ Pendiente de confirmación recepción' :
+                         clientGcResult.remainingBalance > 0 ? '✓ Tarjeta con saldo activo' : 'Canjeada en su totalidad'}
                       </span>
                     </div>
                   </div>

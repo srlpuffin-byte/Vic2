@@ -241,6 +241,10 @@ export const SystemStorage = {
       return { success: false, message: 'El código de Gift Card no existe o no fue encontrado.' };
     }
 
+    if (card.status === 'pending_approval') {
+      return { success: false, message: 'Esta Gift Card aún está pendiente de aprobación/pago por parte del staff.' };
+    }
+
     if (card.status === 'used' || card.remainingBalance <= 0) {
       return { success: false, message: 'Esta Gift Card ya ha sido canjeada en su totalidad.' };
     }
@@ -278,6 +282,38 @@ export const SystemStorage = {
       remainingBalance: newRemaining,
       card: updatedCard
     };
+  },
+
+  approveGiftCard(code: string, approvedBy: string = 'Staff Recepción'): { success: boolean; message: string; card?: GiftCardItem } {
+    const card = this.getGiftCardByCode(code);
+    if (!card) {
+      return { success: false, message: 'Gift Card no encontrada.' };
+    }
+    const updatedCard: GiftCardItem = {
+      ...card,
+      status: 'active',
+      approvedAt: new Date().toISOString(),
+      approvedBy
+    };
+    this.saveGiftCard(updatedCard);
+    return {
+      success: true,
+      message: `¡Voucher ${card.code} confirmado y habilitado con éxito! La clienta ya puede enviarlo o utilizarlo.`,
+      card: updatedCard
+    };
+  },
+
+  deleteGiftCard(code: string): GiftCardItem[] {
+    try {
+      const current = this.getGiftCards();
+      const updated = current.filter(c => c.code.toUpperCase() !== code.toUpperCase());
+      localStorage.setItem(GIFTCARDS_STORAGE_KEY, JSON.stringify(updated));
+      window.dispatchEvent(new CustomEvent('vic_data_updated'));
+      return updated;
+    } catch (e) {
+      console.error('Error deleting gift card', e);
+      return [];
+    }
   },
 
   // Helper to generate Google Calendar Event URL

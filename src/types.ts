@@ -102,13 +102,17 @@ export interface GiftCardItem {
   cardType: 'amount' | 'treatment';
   recipientName: string;
   senderName: string;
+  senderPhone?: string;
+  recipientPhone?: string;
   initialBalance: number;
   remainingBalance: number;
   treatmentName?: string;
   message: string;
-  status: 'active' | 'partially_used' | 'used' | 'expired';
+  status: 'pending_approval' | 'active' | 'partially_used' | 'used' | 'expired';
   createdAt: string;
   expiresAt: string;
+  approvedAt?: string;
+  approvedBy?: string;
   usageHistory: GiftCardUsageRecord[];
 }
 
