@@ -126,9 +126,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             <a href="#antes-despues" className="hover:text-[#c98a92] transition-colors uppercase tracking-wider text-xs font-semibold">
               Antes & Después
             </a>
-            <a href="#instalaciones" className="hover:text-[#c98a92] transition-colors uppercase tracking-wider text-xs font-semibold">
-              Instalaciones
-            </a>
             <a href="#profesionales" className="hover:text-[#c98a92] transition-colors uppercase tracking-wider text-xs font-semibold">
               Equipo
             </a>
@@ -278,13 +275,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="py-2 border-b border-[#ede8e3]/60 uppercase tracking-wider text-xs"
             >
               Resultados Clínicos Antes & Después
-            </a>
-            <a 
-              href="#instalaciones" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-2 border-b border-[#ede8e3]/60 uppercase tracking-wider text-xs"
-            >
-              Instalaciones & Bioseguridad
             </a>
             <a 
               href="#profesionales" 

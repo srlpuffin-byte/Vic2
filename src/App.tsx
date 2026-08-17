@@ -10,7 +10,6 @@ import {
   LocationAndFAQSection, 
   Footer 
 } from './components/AestheticSections';
-import { ClinicTourAndAmenities } from './components/ClinicTourAndAmenities';
 import { ClinicalEquipmentSection } from './components/ClinicalEquipmentSection';
 import { ServiceCatalog } from './components/ServiceCatalog';
 import { SmartSkinDiagnosis } from './components/SmartSkinDiagnosis';
@@ -170,10 +169,7 @@ export function App() {
         {/* 6. Clinical Before & After Interactive Comparison Sliders */}
         <BeforeAfterGallery />
 
-        {/* 7. Virtual Tour & Luxury Clinic Facilities */}
-        <ClinicTourAndAmenities />
-
-        {/* 8. Medical & Professional Team (Mavi Tissera, Dra. Gelso, Lic. Boggio) */}
+        {/* 7. Medical & Professional Team (Mavi Tissera, Dra. Gelso, Lic. Boggio) */}
         <TeamSection
           onConsultSpecialist={() => handleOpenBooking()}
         />
