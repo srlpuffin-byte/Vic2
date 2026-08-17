@@ -29,6 +29,7 @@ import { ServiceItem, Testimonial } from './types';
 import { useGsapAnimations } from './utils/useGsapAnimations';
 import { LuxuryCursorGlow } from './components/LuxuryCursorGlow';
 import { LuxuryAuraBackground } from './components/LuxuryAuraBackground';
+import { VicStories } from './components/VicStories';
 
 export function App() {
   // Initialize full-site GSAP animations
@@ -161,6 +162,11 @@ export function App() {
       {/* Main Content Flow */}
       <main id="main-content">
         
+        {/* 0. VIC Stories — Instagram-Style Highlights & Clinical Action */}
+        <VicStories 
+          onOpenBooking={(srv) => handleOpenBooking(srv)}
+        />
+
         {/* 1. Hero Section & Technology Showcase */}
         <HeroSection
           onOpenBooking={() => handleOpenBooking()}
