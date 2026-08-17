@@ -281,6 +281,26 @@ export function generateGiftCardCanvas(
 }
 
 /**
+ * Generates a File object representing the Gift Card PNG for Web Share API (native image sharing on WhatsApp/Instagram).
+ */
+export async function generateGiftCardFile(
+  card: GiftCardItem,
+  themeId: string = 'rose-gold'
+): Promise<File | null> {
+  const dataUrl = await generateGiftCardCanvas(card, themeId);
+  if (!dataUrl) return null;
+  try {
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    const fileName = `GiftCard_VIC_${card.code}.png`;
+    return new File([blob], fileName, { type: 'image/png' });
+  } catch (err) {
+    console.error('Error creating file from gift card canvas:', err);
+    return null;
+  }
+}
+
+/**
  * Triggers a download of the generated gift card image.
  */
 export async function downloadGiftCardImage(card: GiftCardItem, themeId: string = 'rose-gold') {
@@ -294,3 +314,4 @@ export async function downloadGiftCardImage(card: GiftCardItem, themeId: string 
   link.click();
   document.body.removeChild(link);
 }
+

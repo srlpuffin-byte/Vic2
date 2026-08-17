@@ -28,6 +28,7 @@ import { GiftCardItem } from '../types';
 import { 
   GIFT_CARD_THEMES, 
   generateGiftCardCanvas, 
+  generateGiftCardFile,
   downloadGiftCardImage 
 } from '../utils/giftCardRenderer';
 
@@ -192,10 +193,17 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
     window.open(`https://wa.me/${BUSINESS_DATA.phone}?text=${encodeURIComponent(staffNotice)}`, '_blank');
   };
 
-  const handleSendWhatsAppGift = (card: GiftCardItem) => {
+  const handleSendWhatsAppGift = async (card: GiftCardItem) => {
     if (card.status === 'pending_approval') {
       alert('Esta Gift Card está pendiente de confirmación por parte del equipo de VIC. Una vez confirmada podrás enviarla.');
       return;
+    }
+
+    // Auto trigger HD image download so client has the photo ready in gallery/downloads
+    try {
+      await downloadGiftCardImage(card, selectedThemeId);
+    } catch {
+      // ignore
     }
 
     const giftDetail = card.cardType === 'treatment' 
@@ -203,7 +211,8 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
       : `💰 *Monto de Regalo:* ${formatPrice(card.initialBalance)}`;
 
     const text = 
-      `🎁 *¡HOLA ${card.recipientName.toUpperCase()}! TENÉS UNA GIFT CARD DE REGALO EN VIC ESTÉTICA INTEGRAL* 🌸✨\n\n` +
+      `🎁 *¡HOLA ${card.recipientName.toUpperCase()}! TE REGALARON UNA GIFT CARD DE VIC ESTÉTICA INTEGRAL* 🌸✨\n\n` +
+      `*(Adjuntamos la foto oficial de tu tarjeta de regalo arriba 👆)*\n\n` +
       `👤 *De parte de:* ${card.senderName}\n` +
       `💌 *Dedicatoria especial:* "${card.message}"\n\n` +
       `🎀 *Detalle de tu regalo:*\n` +
@@ -212,7 +221,8 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
       `⏳ *Vigencia:* 90 días corridos\n` +
       `📍 *Lugar:* Mendoza 985, Río Segundo, Córdoba\n\n` +
       `🌟 *¿Cómo canjearlo?*\n` +
-      `Presentá este código al asistir o ingresalo al agendar tu turno online en nuestro sitio web. ¡Te esperamos para una experiencia inolvidable! 💖`;
+      `Presentá la foto o código al asistir, o ingresalo al agendar tu turno online en nuestro sitio web: ${window.location.origin}/#giftcard-${card.code}\n\n` +
+      `¡Te esperamos para consentirte! 💖`;
 
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
@@ -241,20 +251,38 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
       alert('Esta tarjeta está pendiente de confirmación del staff de VIC.');
       return;
     }
-    const shareText = `🎁 ¡Hola ${generatedCard.recipientName}! ${generatedCard.senderName} te ha regalado una Gift Card exclusiva de VIC Estética Integral (Código: ${generatedCard.code}) en Mendoza 985, Río Segundo.`;
-    
-    if (navigator.share) {
-      try {
+
+    setIsDownloading(true);
+
+    try {
+      // 1. Generate the actual PNG image File
+      const file = await generateGiftCardFile(generatedCard, selectedThemeId);
+
+      const shareText = 
+        `🎁 ¡Hola ${generatedCard.recipientName}! ${generatedCard.senderName} te ha regalado una Gift Card exclusiva de VIC Estética Integral (Código: ${generatedCard.code}) en Mendoza 985, Río Segundo. Podés canjearla online o en consultorio.`;
+
+      // 2. If navigator.canShare supports files (Mobile WhatsApp, Instagram, Telegram, AirDrop)
+      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: `Gift Card VIC — ${generatedCard.recipientName}`,
+          text: shareText,
+          files: [file]
+        });
+      } else if (navigator.share) {
+        // Share text & link
         await navigator.share({
           title: `Gift Card VIC — ${generatedCard.recipientName}`,
           text: shareText,
           url: `${window.location.origin}/#giftcard-${generatedCard.code}`
         });
-      } catch {
-        // user cancelled share
+      } else {
+        // Fallback to WhatsApp text + auto download
+        await handleSendWhatsAppGift(generatedCard);
       }
-    } else {
-      handleSendWhatsAppGift(generatedCard);
+    } catch (err) {
+      console.warn('Share cancelled or not supported:', err);
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -498,7 +526,22 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
               </span>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {/* 1. Send via WhatsApp (Active only when approved) */}
+                {/* 1. Share Photo Directly (Web Share API with PNG Image File) */}
+                <button
+                  type="button"
+                  onClick={handleNativeShare}
+                  disabled={!isApproved || isDownloading}
+                  className={`py-3.5 px-4 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                    isApproved
+                      ? 'bg-[#2c2725] hover:bg-black text-white cursor-pointer shadow-md hover:shadow-lg active:scale-98'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-300'
+                  }`}
+                >
+                  <Share2 className="w-4 h-4 text-[#c98a92]" />
+                  <span>{isDownloading ? 'Generando Foto HD...' : 'Compartir Foto de la Gift Card'}</span>
+                </button>
+
+                {/* 2. Send via WhatsApp */}
                 <button
                   type="button"
                   onClick={() => handleSendWhatsAppGift(generatedCard)}
@@ -510,33 +553,18 @@ export const GiftCardModal: React.FC<GiftCardModalProps> = ({
                   }`}
                 >
                   <MessageCircle className="w-4 h-4 fill-current" />
-                  <span>{isApproved ? 'Enviar por WhatsApp a la Agasajada' : 'Enviar por WhatsApp (Requiere Confirmación)'}</span>
+                  <span>{isApproved ? 'Enviar por WhatsApp' : 'Enviar por WhatsApp (Requiere Confirmación)'}</span>
                 </button>
 
-                {/* 2. Download Image (PNG HD) */}
+                {/* 3. Download Image (PNG HD) */}
                 <button
                   type="button"
                   onClick={handleDownloadImage}
                   disabled={isDownloading}
-                  className="py-3.5 px-4 bg-white border border-[#ede8e3] hover:border-[#c98a92] hover:bg-[#fbf0f2] text-[#2c2725] rounded-2xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all active:scale-98"
+                  className="py-3 px-4 bg-white border border-[#ede8e3] hover:border-[#c98a92] hover:bg-[#fbf0f2] text-[#2c2725] rounded-2xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all active:scale-98"
                 >
                   <Download className="w-4 h-4 text-[#c98a92]" />
-                  <span>{isDownloading ? 'Generando PNG...' : 'Descargar Tarjeta (Imagen HD)'}</span>
-                </button>
-
-                {/* 3. Native Share (Mobile) */}
-                <button
-                  type="button"
-                  onClick={handleNativeShare}
-                  disabled={!isApproved}
-                  className={`py-3 px-4 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-                    isApproved
-                      ? 'bg-[#2c2725] hover:bg-black text-white cursor-pointer shadow-xs'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  <Share2 className="w-4 h-4 text-[#c98a92]" />
-                  <span>Compartir en Redes / Mensajes</span>
+                  <span>{isDownloading ? 'Descargando...' : 'Descargar Foto HD (PNG)'}</span>
                 </button>
 
                 {/* 4. Copy Code */}
