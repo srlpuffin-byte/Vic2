@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+
+  .font-serif-cormorant {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  .font-script {
+    font-family: 'Alex Brush', cursive;
+  }
+}
+
+/* Custom Rose-Gold & Nude palette utilities */
+:root {
+  --vic-rose: #c98a92;
+  --vic-rose-dark: #b57a82;
+  --vic-rose-light: #f7eef0;
+  --vic-sand: #f5f2ed;
+  --vic-dark: #2c2725;
+  --vic-muted: #6b6462;
+  --vic-border: #ede8e3;
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e2dad2;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c98a92;
+}
+
+/* Soft glow and transitions */
+.soft-card-shadow {
+  box-shadow: 0 10px 30px -5px rgba(201, 138, 146, 0.08), 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.soft-card-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.soft-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px -5px rgba(201, 138, 146, 0.14), 0 8px 20px rgba(0, 0, 0, 0.04);
+}

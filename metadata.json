@@ -1,0 +1,6 @@
+{
+  "name": "VIC Estética Integral",
+  "description": "Espacio integral de medicina estética (Dra. María Pía Gelso), aparatología de vanguardia (Láser 4 Ondas, Alquimia MiniVac, VelaSlim Plus, Alpha Synergy, Mío Up, Exilis 360), cosmiatría, fisioterapia, kinesiología, nutrición y manicuría en Río Segundo, Córdoba.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
